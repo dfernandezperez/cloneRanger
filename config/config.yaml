@@ -1,0 +1,30 @@
+samples: "config/samples.tsv"
+
+get_cellranger:
+  url: "https://cf.10xgenomics.com/releases/cell-exp/cellranger-6.1.1.tar.gz?Expires=1634261859&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9jZi4xMHhnZW5vbWljcy5jb20vcmVsZWFzZXMvY2VsbC1leHAvY2VsbHJhbmdlci02LjEuMS50YXIuZ3oiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE2MzQyNjE4NTl9fX1dfQ__&Signature=MkdohJy9pHixfeA2XWMFkYHkwScB8dXxLxk6qJYOpBYmc1hx4fZ0B2626sIJaT-LbmkROlPyEmTOYuHMLPjPfGgSykBs5Wi7Deaie-w4pDOJbqU5Tg-8cD8ALJ1MRA5eKzJ2PqB9yBvEzV3tr1hoA0WrFmVuUsSqU3j1p0IxA4fFYRoKKew5~FGDgn4rHlDmcJBfUGO0slrjweQrbhlnLqDvFm4LVgOOa~u86-3~OVuC20sy5c~b7J60OPFEd5Y1td80K2Cwx9~YlQMWXOjZ-2g3wYhrqljIMblUeVtMmqmjuZrbgQfLJAI9-4uam6eDx7MOVA0n3qsKXoS-N~1FSg__&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA"
+
+get_reference:
+  url: "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz"
+
+counts:
+  introns: True
+  n_cells: 3000
+  mem: 190
+
+filter_empty:
+  niters: 30000
+
+qc:
+  pct_counts_mt: 5
+  total_counts: 60000
+  n_genes_by_counts: 2000
+
+dim_reduc:
+  var_thresh: 0.75
+
+cluster:
+  res: 0.5
+  markers:
+    - "YOUR"
+    - "FAVOURITE"
+    - "GENE"

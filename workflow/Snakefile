@@ -1,4 +1,16 @@
-# Main entrypoint of the workflow. 
-# Please follow the best practices: 
-# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+import pandas as pd
+
+configfile: "config/config.yaml"
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Load sample sheet and cluster configuration, config file
+#-----------------------------------------------------------------------------------------------------------------------
+samples       = pd.read_csv(config["samples"], dtype=str, sep ="\t").set_index(["sample_id", "lane"], drop=False).sort_index()
+samples.index = samples.index.set_levels([i.astype(str) for i in samples.index.levels])  # enforce str in index
+
+include: "rules/common.smk"
+include: "rules/resources.smk"
+
+rule all:
+	input:
+		"data/old_exvivo_S1_L003_R1_001.fastq.gz"
