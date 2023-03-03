@@ -18,4 +18,4 @@ include: "rules/counts.smk"
 
 rule all:
     input:
-        expand("results/counts/{sample}/outs/web_summary.html", sample = SAMPLES)
+        expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
