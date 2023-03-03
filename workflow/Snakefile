@@ -1,16 +1,21 @@
 import pandas as pd
+import yaml
 
 configfile: "config/config.yaml"
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file
 #-----------------------------------------------------------------------------------------------------------------------
-samples       = pd.read_csv(config["samples"], dtype=str, sep ="\t").set_index(["sample_id", "lane"], drop=False).sort_index()
-samples.index = samples.index.set_levels([i.astype(str) for i in samples.index.levels])  # enforce str in index
+units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "lane"], drop=False).sort_index()
+units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
+
+SAMPLES   = set(units["sample_id"])
+RESOURCES = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
 
 include: "rules/common.smk"
 include: "rules/resources.smk"
+include: "rules/counts.smk"
 
 rule all:
-	input:
-		"data/old_exvivo_S1_L003_R1_001.fastq.gz"
+    input:
+        expand("results/counts/{sample}/outs/web_summary.html", sample = SAMPLES)

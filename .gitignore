@@ -6,3 +6,4 @@ logs/**
 ._*
 data/
 .DS_Store
+pid.txt

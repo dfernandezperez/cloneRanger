@@ -21,21 +21,9 @@ from yaml import safe_load
 
 
 # Input functions
-# def get_fastqs(wildcards):
-#     """Return all FASTQS specified in sample metadata."""
-#     return (metadata[wildcards.lane][wildcards.sample][wildcards.read],)
-
 def get_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
-    return samples.loc[(wildcards.sample, wildcards.lane), ["R1", "R2"]].dropna()
-
-def get_bcl_results():
-    """Retrieve the bcl results files."""
-    bcls = list(Path("data").glob("*.bcl2fastq.zip"))
-    return dict(
-        bcl_zip=bcls,
-    )
-
+    return units.loc[(wildcards.sample, wildcards.lane), ["R1", "R2"]].dropna()
 
 def agg_fastqc():
     """Aggregate input from FASTQC for MultiQC.
@@ -64,29 +52,10 @@ def convert_introns():
     For ease of use, the user only specifies True or False
     This function handles the conversion.
     """
-    if config["counts"]["introns"]:
-        return "--include-introns"
+    if not config["cellranger_count"]["introns"]:
+        return "--include-introns False"
     else:
         return ""
-
-
-def get_sample_reads(wildcards):
-    """Get all reads for Cellranger.
-
-    Cellranger doesn't actually need the file names,
-    but we need to mark them as dependencies and introduce the sample wildcard.
-    Given we know the lane (metadata.key()) and the read (R1 or R2),
-    we use the following expand statement to do so.
-    """
-    files = expand(
-        "data/{{sample}}_S1_L00{lane}_{read}_001.fastq.gz",
-        lane=metadata.keys(),
-        read=["R1", "R2"],
-    )
-    return dict(
-        fastqs=files,
-    )
-
 
 def get_qc_data(wildcards):
     """Get all QC'd data, grouped by lane, for SOLO."""

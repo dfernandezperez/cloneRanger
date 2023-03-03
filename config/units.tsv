@@ -1,0 +1,2 @@
+sample_id	lane	R1	R2
+old_exvivo	3	/home/dfernandezp/snakemake-scRNAseq/test/Old_ScRNA_1376-SCI7T055-SCI5T055_HCKY7DSX5_S1_L003_R1_001.fastq.gz	/home/dfernandezp/snakemake-scRNAseq/test/Old_ScRNA_1376-SCI7T055-SCI5T055_HCKY7DSX5_S1_L003_R2_001.fastq.gz

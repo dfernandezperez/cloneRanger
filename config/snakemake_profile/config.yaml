@@ -1,0 +1,7 @@
+cores            : 120 # Define total amount of cores that the pipeline can use
+resources        : mem_mb=128000 # Define total amount of ram that pipeline can use
+default-resources: mem_mb=1000 # Set default ram for rules (cores is by default 1)
+latency-wait     : 120
+keep-going       : true
+use-singularity  : true
+singularity-args : "--bind /stemcell"

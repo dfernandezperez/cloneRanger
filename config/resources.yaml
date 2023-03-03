@@ -1,0 +1,4 @@
+# Maxmem has to be specified in megabytes (To transform gb to mb just do gb*1000)
+cellranger_count:
+    cpu : 90
+    MaxMem: 128000
