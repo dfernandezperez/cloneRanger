@@ -23,7 +23,23 @@ from yaml import safe_load
 # Input functions
 def get_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
-    return units.loc[(wildcards.sample, wildcards.lane), ["R1", "R2"]].dropna()
+    return units.loc[(wildcards.sample, wildcards.feature_bc, wildcards.lane), ["R1", "R2"]].dropna()
+
+def get_library_type(wildcards):
+    """Create the content of library.csv for the feature barcoding pipeline
+    from cellranger.
+    
+    Based on what is written in the column feature_bc from the units file,
+    write the following: "fastq folder,fastq name,library type".
+    """
+    feature_barcode_col = set( units.loc[(wildcards.sample), "feature_bc"] )
+    lib_types = {
+        'GEX': 'data,' + wildcards.sample + '_GEX,Gene Expression', 
+        'FB' : 'data,' + wildcards.sample + '_FB,Custom'
+    }
+
+    fb_names = [lib_types.get(fb) for fb in feature_barcode_col]
+    return '\n'.join(fb_names)
 
 def agg_fastqc():
     """Aggregate input from FASTQC for MultiQC.
@@ -54,6 +70,16 @@ def convert_introns():
     """
     if not config["cellranger_count"]["introns"]:
         return "--include-introns False"
+    else:
+        return ""
+
+def is_feature_bc(wildcards):
+    """Specify whether feature barcoding has been performed
+    or not
+    """
+    if not config["feature_bc_config"]["feature_bc"]:
+        return "works"
+        # return "--libraries=${library} --feature-ref=${feature_ref}"
     else:
         return ""
 

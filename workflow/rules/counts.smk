@@ -11,9 +11,10 @@ rule cellranger_count:
             subcategory="{sample}",
         ),
     params:
-        introns = convert_introns(),
-        n_cells = config["cellranger_count"]["n_cells"],
-        genome  = config["genome_reference"]
+        introns     = convert_introns(),
+        n_cells     = config["cellranger_count"]["n_cells"],
+        genome      = config["genome_reference"],
+        feature_bc  = is_feature_bc
     log:
         "results/00_logs/counts/{sample}.log",
     benchmark:
@@ -22,7 +23,7 @@ rule cellranger_count:
         RESOURCES["cellranger_count"]["cpu"]
     resources:
         mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
-    singularity: 
+    container: 
         config["cellranger_sif"]
     shell:
         """
@@ -36,6 +37,7 @@ rule cellranger_count:
         --expect-cells {params.n_cells} \
         --localcores {threads} \
         --localmem {resources.mem_mb} \
+        {params.feature_bc} \
         &> {log} && \
         # a folder in results/counts/{wildcards.sample} is automatically created due to the output declared, which 
         # is a problem to move the cellranger output files. The workaround of deleting that folder fixes that.

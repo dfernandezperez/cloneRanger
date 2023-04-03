@@ -7,3 +7,4 @@ logs/**
 data/
 .DS_Store
 pid.txt
+.vscode/

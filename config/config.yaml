@@ -1,9 +1,18 @@
 units    : config/units.tsv
 resources: config/resources.yaml
 
+# Singularity images, reference genome, library and feature-ref (last 2 in case feature barcoding is performed)
 cellranger_sif  : /stemcell/data/Singularity_images/cellranger_7.0.0.sif
 genome_reference: /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-A
 
+# Cellranger count parameters
 cellranger_count:
   introns: True
   n_cells: 8000
+
+# feature barcodoing parameters/settings
+feature_bc_config:
+  feature_bc: True
+  bc_patterns:
+    "GAGAGACCATATGTGTGTGAATCCAGCCTACCGCTGA" : "GFP"
+    "GAGTAATGAGCTGCATGTCTGGATCCGA" : "Sapphire"

@@ -6,7 +6,7 @@ configfile: "config/config.yaml"
 #-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file
 #-----------------------------------------------------------------------------------------------------------------------
-units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "lane"], drop=False).sort_index()
+units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "feature_bc", "lane"], drop=False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
 SAMPLES   = set(units["sample_id"])
@@ -18,4 +18,8 @@ include: "rules/counts.smk"
 
 rule all:
     input:
-        expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
+        "results/00_logs/feature_bc_libraries/D5_rep1_library.csv",
+        "results/00_logs/feature_bc_libraries/D5_rep1_FB_feature_reference.csv"
+        # "data/D5_rep1_FB_S1_L001_R1_001.fastq.gz",
+        # expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
+
