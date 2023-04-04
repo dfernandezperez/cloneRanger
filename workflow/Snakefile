@@ -11,15 +11,16 @@ units.index = units.index.set_levels([i.astype(str) for i in units.index.levels]
 
 SAMPLES   = set(units["sample_id"])
 RESOURCES = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
+LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
 
 include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/counts.smk"
+include: "rules/larry_processing.smk"
 
 rule all:
     input:
-        "results/00_logs/feature_bc_libraries/D5_rep1_library.csv",
-        "results/00_logs/feature_bc_libraries/D5_rep1_FB_feature_reference.csv"
-        # "data/D5_rep1_FB_S1_L001_R1_001.fastq.gz",
+        expand("results/00_logs/feature_bc_libraries/{sample}_library.csv", sample = SAMPLES),
+        expand("data/bc_filt/{sample}_FB_S1_L001_{read}_001_{larry_color}.fastq.gz", larry_color = LARRY_COLORS, sample = SAMPLES, read = config["feature_bc_config"]["read_feature_bc"]),
+        # "data/collapsed_barcodes_hd{}.fastq.gz".format(config["feature_bc_config"]["hamming_distance"]),
         # expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
-
