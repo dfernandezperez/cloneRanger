@@ -1,7 +1,5 @@
 import gzip
 import re
-import pandas as pd
-import numpy as np
 from Bio import SeqIO
 
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -10,28 +8,9 @@ from Bio import SeqIO
 
 # Define the input and output file names
 input_file    = snakemake.input[0]
-output_fastq  = snakemake.output[0]
-feature_ref   = snakemake.output[1]
+output_fastqs = snakemake.output
 barcodes_dict = snakemake.params[0]
 read_feat_bc  = snakemake.params[1]
-
-#------------------------------------------------------------------------------------------------------------------------------------
-# Declare functions
-#------------------------------------------------------------------------------------------------------------------------------------
-
-def create_feature_ref(bc_dict, read):
-    """Get dictionary with barcode sequences and their corresponding larry color to 
-    generate the feature reference csv file required by cellranger."""
-    
-    bc_df                 = pd.DataFrame.from_dict(bc_dict, orient='index', columns = ['id'])
-    bc_df                 = bc_df.rename_axis("sequence").reset_index()
-    bc_df['name']         = bc_df.groupby('id').cumcount() + 1
-    bc_df['name']         = bc_df['id'] + "_" + bc_df['name'].astype(str)
-    bc_df['id']           = bc_df['name']
-    bc_df['read']         = read
-    bc_df['pattern']      = "(BC)"
-    bc_df['feature_type'] = "Custom"
-    return(bc_df)
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Generate regex patterns to filer fastq
@@ -43,14 +22,14 @@ patterns      = [re.compile(r'{}'.format(barcode)) for barcode in barcodes_dict.
 patterns_dict = {key: value for key, value in zip(patterns, barcodes_dict.values())}
 
 # Store matched sequences with their corresponding barcode
-matched_seqs = {}
+matched_seqs = {key: [] for key in barcodes_dict.values()}
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Parse fastq file and subset sequences containing valid barcodes. Generate feature reference csv file
 #------------------------------------------------------------------------------------------------------------------------------------
 
 # Open the compressed fastq file & output file
-with gzip.open(input_file, 'rt') as input_handle, gzip.open(output_fastq, 'wt') as output_handle:
+with gzip.open(input_file, 'rt') as input_handle:
     # Iterate over each record in the fastq file
     for record in SeqIO.parse(input_handle, 'fastq'):
         # Look for barcode patterns
@@ -59,10 +38,13 @@ with gzip.open(input_file, 'rt') as input_handle, gzip.open(output_fastq, 'wt') 
             if match:
                 # Update record to contain just matched sequence 
                 new_record = record[match.start() : match.end()]
-                # Save matched seq into a dictionary with the associated barcode 
-                if str(new_record.seq) not in matched_seqs: matched_seqs[str(new_record.seq)] = patterns_dict[pattern]
-                # Write output to fastq. Just 1 match can happen (different barcodes). Once a match is found pass to next fastq entry
-                count = SeqIO.write(new_record, output_handle, 'fastq')
-                break 
+                # Save updated records to dictionary. Every key is a different barcode color, the content are all the records
+                # corresponding to that color.
+                matched_seqs[patterns_dict[pattern]] += new_record,
+                break
 
-create_feature_ref(matched_seqs, read_feat_bc).to_csv(feature_ref, index = False)
+i = 0 # Order of output files is the same as the keys of the dictionary since both of them are taken from the same config variable
+for key in matched_seqs.keys():
+    with gzip.open(output_fastqs[i], 'wt') as output_handle:
+        count = SeqIO.write(matched_seqs[key], output_handle, 'fastq')
+    i += 1

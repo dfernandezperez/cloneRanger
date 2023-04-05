@@ -3,8 +3,8 @@ rule clean_names:
     input:
         get_fastqs,
     output:
-        fw = "data/{sample}_{feature_bc}_{lane}_R1_symlink.fastq.gz",
-        rv = "data/{sample}_{feature_bc}_{lane}_R2_symlink.fastq.gz",
+        fw = temp("data/{sample}_{feature_bc}_{lane}_R1_symlink.fastq.gz"),
+        rv = temp("data/{sample}_{feature_bc}_{lane}_R2_symlink.fastq.gz"),
     container:
         None
     shell:
@@ -26,6 +26,6 @@ rule merge_lanes:
         "Merging fastq files from {input}"
     shell:
         """
-        cat {input.fw} > {output.fw}
-        cat {input.rv} > {output.rv}
+        cat {input.fw} > {output.fw} 2> {log}
+        cat {input.rv} > {output.rv} 2>> {log}
         """

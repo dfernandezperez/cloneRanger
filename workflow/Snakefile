@@ -9,8 +9,8 @@ configfile: "config/config.yaml"
 units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "feature_bc", "lane"], drop=False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
-SAMPLES   = set(units["sample_id"])
-RESOURCES = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
+SAMPLES      = set(units["sample_id"])
+RESOURCES    = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
 LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
 
 include: "rules/common.smk"
@@ -20,7 +20,15 @@ include: "rules/larry_processing.smk"
 
 rule all:
     input:
-        expand("results/00_logs/feature_bc_libraries/{sample}_library.csv", sample = SAMPLES),
-        expand("data/bc_filt/{sample}_FB_S1_L001_{read}_001_{larry_color}.fastq.gz", larry_color = LARRY_COLORS, sample = SAMPLES, read = config["feature_bc_config"]["read_feature_bc"]),
+        "data/feature_reference/Feature_reference.csv"
+        # expand("results/00_logs/feature_bc_libraries/{sample}_library.csv", sample = SAMPLES),
+        # expand("data/bc_filt/{sample}_FB_S1_L001_{read}_001_{larry_color}.fastq.gz", larry_color = LARRY_COLORS, sample = SAMPLES, read = config["feature_bc_config"]["read_feature_bc"]),
+        # expand(
+        #     "data/bc_filt/collapsed/{sample}_FB_S1_L001_{read}_001_{larry_color}_collapsed-hd{hd}.fastq.gz",
+        #     sample      = SAMPLES,
+        #     read        = config["feature_bc_config"]["read_feature_bc"],
+        #     larry_color = LARRY_COLORS,
+        #     hd          = config["feature_bc_config"]["hamming_distance"]
+        # ),
         # "data/collapsed_barcodes_hd{}.fastq.gz".format(config["feature_bc_config"]["hamming_distance"]),
         # expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
