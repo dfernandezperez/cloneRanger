@@ -19,6 +19,7 @@ feature_ref <- snakemake@input %>%
   mutate(
     id   = paste0(id, "_", 1:n()),
     name = id
-  )
+  ) %>%
+  select(id, name, read, pattern, sequence, feature_type)
 
 write_csv(feature_ref, snakemake@output[[1]])

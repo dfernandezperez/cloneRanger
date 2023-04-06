@@ -62,17 +62,33 @@ def extracted_bc_to_fq(output_fastqs, barcode_reads):
 
 def subset_cb_fastq(input_fastq, output_fastq, barcode_reads):
     """
+    Subset the fastq file that contains the cellular barcodes (instead of larry barcodes) to contain the same read ids
+    of the larry barcode fastq, which has been filtered and now does not contain all the initial fastq entries.
+
+    Also, since the larry bc fq is split in different colors (if there is sequential barcoding), the order of fastq
+    reads will be different. For this, the cellular barcode fastq must be filtered and then sorted to match the larry
+    fastq.
     """
-    read_primer  = re.compile(r"\s.*$")
-    filtered_ids = {read_primer.sub('', fastq_record[0]) for larry_color in barcode_reads.values() for fastq_record in larry_color}
+    read_primer      = re.compile(r"\s.*$")
+    filtered_ids     = [read_primer.sub('', fastq_record[0]) for larry_color in barcode_reads.values() for fastq_record in larry_color]
+    filtered_ids_set = set(filtered_ids)
+    fastq_records    = {}
 
     with gzip.open(input_fastq, 'rt') as input_handle, gzip.open(output_fastq, 'wt') as output_handle:
+        # Parse fastq and store records in dictionary using read_id as key
         for title, seq, qual in FastqGeneralIterator(input_handle):
             title_no_read_id = read_primer.sub('', title)
-            if title_no_read_id in filtered_ids:
+            if title_no_read_id in filtered_ids_set:
+                fastq_records[title_no_read_id] = [title, seq, qual]
+
+        # Sort the keys (read_id) of the dict to match the order of read_ids from the larry fastq
+        index_map = {v: i for i, v in enumerate(filtered_ids)}
+        fastq_records = dict( sorted(fastq_records.items(), key=lambda pair: index_map[pair[0]]) )
+
+        # Save to fastq
+        for title, seq, qual in fastq_records.values():
                 _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
                 
-
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Main

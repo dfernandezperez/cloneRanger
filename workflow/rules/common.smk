@@ -60,8 +60,8 @@ def get_library_type(wildcards):
     feature_barcode_col = set( units.loc[(wildcards.sample), "feature_bc"] )
 
     lib_types = {
-        'GEX': abs_path + '/data,' + wildcards.sample + '_GEX,Gene Expression', 
-        'FB' : abs_path + '/data/bc_filt,' + wildcards.sample + '_FB,Custom'
+        'GEX': abs_path + '/data/clean,' + wildcards.sample + '_GEX,Gene Expression', 
+        'FB' : abs_path + '/data/clean,' + wildcards.sample + '_FB,Custom'
     }
 
     fb_names = [lib_types.get(fb) for fb in feature_barcode_col]

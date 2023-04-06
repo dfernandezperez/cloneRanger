@@ -1,6 +1,9 @@
 rule create_library:
+    input:
+        fb  = expand("data/clean/{{sample}}_FB_S1_L001_{read}_001.fastq.gz", read = ["R1", "R2"]),
+        gex = expand("data/clean/{{sample}}_GEX_S1_L001_{read}_001.fastq.gz", read = ["R1", "R2"])
     output:
-        "results/data/feature_bc_libraries/{sample}_library.csv"
+        "data/feature_bc_libraries/{sample}_library.csv"
     params:
         feature_barcoding = get_library_type
     shell:
@@ -29,6 +32,8 @@ rule extract_barcodes:
         "results/00_logs/extract_barcodes/{sample}.log"
     benchmark:
         "results/benchmarks/extract_barcodes/{sample}.txt"
+    resources:
+        mem_mb = RESOURCES["extract_barcodes"]["MaxMem"]
     script:
         "../scripts/extract_barcodes.py"
 
@@ -42,6 +47,8 @@ rule collapse_fastq_hd:
         "results/00_logs/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.log"
     benchmark:
         "results/benchmarks/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.txt"
+    resources:
+        mem_mb = RESOURCES["collapse_fastq_hd"]["MaxMem"]
     shell:
         """
         /home/dfernandezp/miniconda3/bin/java -Xmx200G -Xss1G -jar /stemcell/scratch/dfernandezp/IndranilSingh/drug_screening_rabseq/software/UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
@@ -58,6 +65,8 @@ rule correct_barcodes:
         "results/00_logs/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.log"
     benchmark:
         "results/benchmarks/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.txt"
+    resources:
+        mem_mb = RESOURCES["correct_barcodes"]["MaxMem"]
     script:
         "../scripts/correct_barcodes.py"
 

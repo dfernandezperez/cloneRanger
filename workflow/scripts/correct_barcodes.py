@@ -21,16 +21,17 @@ def create_feature_ref(reference_dict, color, read, feature_ref):
     It takes as input a dictionary with read cluster id's as keys and sequences (corresponding to the
     reference barcode of the clusetr) as values.
     """
-    
+    extra_nts = r'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
     bc_dict = {str(key): color for key in reference_dict.values()}
 
     bc_df                 = pd.DataFrame.from_dict(bc_dict, orient='index', columns = ['id'])
     bc_df                 = bc_df.rename_axis("sequence").reset_index()
+    bc_df['sequence']     = bc_df['sequence'].str.replace(extra_nts, '', regex=True).astype('str')
     bc_df['name']         = bc_df.groupby('id').cumcount() + 1
     bc_df['name']         = bc_df['id'] + "_" + bc_df['name'].astype(str)
     bc_df['id']           = bc_df['name']
     bc_df['read']         = read
-    bc_df['pattern']      = "(BC)"
+    bc_df['pattern']      = extra_nts + "(BC)"
     bc_df['feature_type'] = "Custom"
     
     bc_df.to_csv(feature_ref, index = False)
@@ -56,7 +57,7 @@ def get_reference_barcodes(input_fastq):
             if match:
                 # Create a dictionary with the cluster id and the corresponding consensus sequence
                 cluster_id = re.sub('^.* cluster_id=([0-9]+).*', r'\1', title)
-                cluster_dict_id[cluster_id] = seq
+                cluster_dict_id[cluster_id] = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT" + seq
 
     return(cluster_dict_id, fastq_entries)
 
@@ -76,9 +77,12 @@ def write_corrected_fastq(output_fastq, reference_dict, fastq_entries):
         for title, seq, qual in fastq_entries:
         # Get cluster id for read, use that cluster id to access cluster_dict_id dict
         # which contains the reference sequence. This way I generate a second dict in which
-        # Every read id is a associated to a specific sequence
+        # Every read id is a associated to a specific sequence.
+        # Remove the tag from umicollapse from read_id (title)
             cluster_id = re.sub('^.* cluster_id=([0-9]+).*', r'\1', title)
             seq = reference_dict[cluster_id]
+            title = re.sub("\scluster_id.*$", "", title)
+            qual = "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" + qual # Fake qscore for the extra 50 fake T's
             _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
 
 

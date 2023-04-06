@@ -20,4 +20,6 @@ include: "rules/larry_processing.smk"
 
 rule all:
     input:
-        expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
+        # "data/clean/CTR-rep1_FB_S1_L001_R1_001.fastq.gz",
+        # "data/feature_reference/Feature_reference.csv"
+        expand("results/01_counts/{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz", sample = SAMPLES)

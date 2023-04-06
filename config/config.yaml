@@ -9,6 +9,7 @@ genome_reference: /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-
 cellranger_count:
   introns: True
   n_cells: 8000
+  mem: 120
 
 # feature barcodoing parameters/settings
 feature_bc_config:

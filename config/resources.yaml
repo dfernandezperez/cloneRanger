@@ -2,3 +2,12 @@
 cellranger_count:
     cpu : 90
     MaxMem: 128000
+
+collapse_fastq_hd:
+    MaxMem: 30000
+
+correct_barcodes:
+    MaxMem: 6000
+
+extract_barcodes:
+    MaxMem: 16000
