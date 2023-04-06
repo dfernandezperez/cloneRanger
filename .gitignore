@@ -8,3 +8,5 @@ data/
 .DS_Store
 pid.txt
 .vscode/
+snakemake.err
+snakemake.log

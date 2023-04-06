@@ -37,3 +37,8 @@ rule move_gex_fq:
     output:
         fw = "data/clean/{sample}_GEX_S1_L001_R1_001.fastq.gz",
         rv = "data/clean/{sample}_GEX_S1_L001_R2_001.fastq.gz"
+    shell:
+        """
+        mv {input.fw} {output.fw}
+        mv {input.rv} {output.rv}
+        """

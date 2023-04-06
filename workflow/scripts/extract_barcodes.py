@@ -5,23 +5,11 @@ from Bio.SeqIO.QualityIO import FastqGeneralIterator
 #------------------------------------------------------------------------------------------------------------------------------------
 # Declare input/output files
 #------------------------------------------------------------------------------------------------------------------------------------
-input_fb  = snakemake.input[0]
-input_cb  = snakemake.input[0]
-output_fb = snakemake.output[0]
-output_cb = snakemake.output[1]
-barcode_patterns = snakemake.params[0]
-
-input_fb  = "data/CTR-rep1_FB_S1_L001_R2_001.fastq.gz"
-input_cb  = "data/CTR-rep1_FB_S1_L001_R1_001.fastq.gz"
-output_fb = ["data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_GFP.fastq.gz",
-             "data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_Sapphire.fastq.gz",
-             "data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_Scarlet.fastq.gz"]
-output_cb = "data/bc_filt/CTR-rep1_FB_S1_L001_R1_001.fastq.gz"
-barcode_patterns = {
-    "TGCTAA....TG....CA....GT....AG...." : "GFP",
-    "GTTCCA....TG....CA....GT....AG...." : "Sapphire",
-    "AAGATT....TG....CA....GT....AG...." : "Scarlet"
-}
+input_fb  = snakemake.input["fb"]
+input_cb  = snakemake.input["cb"]
+output_fb = snakemake.output["filt_fb"]
+output_cb = snakemake.output["filt_cb"]
+barcode_patterns = snakemake.params["barcode_dict"]
 
 
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +59,7 @@ def extracted_bc_to_fq(output_fastqs, barcode_reads):
             for title, seq, qual in barcode_reads[key]:
                 _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
 
+
 def subset_cb_fastq(input_fastq, output_fastq, barcode_reads):
     """
     """
@@ -83,6 +72,7 @@ def subset_cb_fastq(input_fastq, output_fastq, barcode_reads):
             if title_no_read_id in filtered_ids:
                 _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
                 
+
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Main

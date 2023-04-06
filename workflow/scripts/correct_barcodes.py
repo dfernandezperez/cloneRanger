@@ -4,10 +4,10 @@ import pandas as pd
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
 input_file    = snakemake.input[0]
-output_fastq  = snakemake.output[0]
-feature_ref   = snakemake.output[1]
+output_fastq  = snakemake.output["corrected_fq"]
+feature_ref   = snakemake.output["feature_ref"]
 color         = snakemake.wildcards.larry_color
-read          = snakemake.wildcards.read
+read          = snakemake.wildcards.read_fb
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Declare functions
