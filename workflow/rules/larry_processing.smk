@@ -9,10 +9,11 @@ rule create_library:
         echo "{params.feature_barcoding}" >> {output}
         """
 
+
 rule extract_barcodes:
     input: 
-        fb = "data/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_feature_bc"]),
-        cb = "data/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"]),
+        fb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_feature_bc"]),
+        cb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"]),
     output:
         filt_fb = temp(
             expand(
@@ -21,7 +22,7 @@ rule extract_barcodes:
                 read_fb = config["feature_bc_config"]["read_feature_bc"]
                 )
             ),
-        filt_cb = temp("data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"]))
+        filt_cb = "data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"])
     params:
         barcode_dict = config["feature_bc_config"]["bc_patterns"]
     log:
@@ -29,29 +30,29 @@ rule extract_barcodes:
     benchmark:
         "results/benchmarks/extract_barcodes/{sample}.txt"
     script:
-        "../scripts/extract_barcodes_test.py"
+        "../scripts/extract_barcodes.py"
+
 
 rule collapse_fastq_hd:
     input:
-        "data/bc_filt/{sample}_FB_S1_L001_{read}_001_{larry_color}.fastq.gz"
+        "data/bc_filt/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}.fastq.gz"
     output:
-        temp("data/bc_filt/collapsed/{sample}_FB_S1_L001_{read}_001_{larry_color}_collapsed-hd{hd}.fastq.gz")
-    wildcard_constraints:
-        hd="\d+"
+        "data/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}.fastq.gz"
     log:
-        "results/00_logs/collapse_fastq_hd/{sample}_{read}_{larry_color}_{hd}.log"
+        "results/00_logs/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.log"
     benchmark:
-        "results/benchmarks/collapse_fastq_hd/{sample}_{read}_{larry_color}_{hd}.txt"
+        "results/benchmarks/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     shell:
         """
         /home/dfernandezp/miniconda3/bin/java -Xmx200G -Xss1G -jar /stemcell/scratch/dfernandezp/IndranilSingh/drug_screening_rabseq/software/UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
         """
 
+
 rule correct_barcodes:
     input:
-        "data/bc_filt/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}.fastq.gz"
+        "data/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}.fastq.gz"
     output:
-        corrected_fq = temp("data/bc_filt/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}-corrected.fastq.gz")
+        corrected_fq = temp("data/corrected/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}-corrected.fastq.gz"),
         feature_ref  = temp("data/feature_reference/{sample}_{read_fb}_{larry_color}_hd{hd}_feature_reference.csv")
     log:
         "results/00_logs/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.log"
@@ -60,10 +61,11 @@ rule correct_barcodes:
     script:
         "../scripts/correct_barcodes.py"
 
+
 rule merge_corrected_fastq:
     input:
         expand(
-            "data/bc_filt/collapsed/{{sample}}_FB_S1_L001_{{read_fb}}_001_{larry_color}_collapsed-hd{hd}-corrected.fastq.gz",
+            "data/corrected/{{sample}}_FB_S1_L001_{{read_fb}}_001_{larry_color}_collapsed-hd{hd}-corrected.fastq.gz",
             larry_color = LARRY_COLORS,
             hd          = config["feature_bc_config"]["hamming_distance"]
         )
@@ -78,12 +80,13 @@ rule merge_corrected_fastq:
         cat {input} > {output}
         """
 
+
 rule generate_feature_ref:
     input:
         expand(
-            "data/feature_reference/{sample}_{read}_{larry_color}_hd{hd}_feature_reference.csv", 
+            "data/feature_reference/{sample}_{read_fb}_{larry_color}_hd{hd}_feature_reference.csv", 
             sample      = SAMPLES,
-            read        = config["feature_bc_config"]["read_feature_bc"],
+            read_fb     = config["feature_bc_config"]["read_feature_bc"],
             larry_color = LARRY_COLORS,
             hd          = config["feature_bc_config"]["hamming_distance"]
         )

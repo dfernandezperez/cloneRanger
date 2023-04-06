@@ -15,10 +15,13 @@ import os
 # for _, v in metadata.items():
 #     SAMPLES = SAMPLES.union(v.keys())
 
-
-# # wildcard restraints - as reads can only be R1 or R2
-# wildcard_constraints:
-#     read="R[12]",
+# wildcard constraints to be sure that output names are defined properly
+wildcard_constraints:
+    # hamming distance can just be a value
+    hd="\d+" ,
+    # reads corresponding to cellular barcode and feature barcode can only be R1 or R2
+    read_fb="R[12]",
+    read_cb="R[12]",
 
 
 # Input functions

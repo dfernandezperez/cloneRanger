@@ -20,17 +20,4 @@ include: "rules/larry_processing.smk"
 
 rule all:
     input:
-        expand("data/clean/{sample}_FB_S1_L001_{read_fb}_001.fastq.gz", sample = SAMPLES, read_fb = config["feature_bc_config"]["read_feature_bc"])
-        # "data/feature_reference/Feature_reference.csv"
-        # expand("results/data/feature_bc_libraries/{sample}_library.csv", sample = SAMPLES),
-        # expand("data/bc_filt/{sample}_FB_S1_L001_{read}_001_{larry_color}.fastq.gz", larry_color = LARRY_COLORS, sample = SAMPLES, read = config["feature_bc_config"]["read_feature_bc"]),
-        # expand("data/bc_filt/{sample}_FB_S1_L001_{read}_001.fastq.gz", sample = SAMPLES, read = config["feature_bc_config"]["read_cellular_bc"]),
-        # expand(
-        #     "data/bc_filt/collapsed/{sample}_FB_S1_L001_{read}_001_{larry_color}_collapsed-hd{hd}.fastq.gz",
-        #     sample      = SAMPLES,
-        #     read        = config["feature_bc_config"]["read_feature_bc"],
-        #     larry_color = LARRY_COLORS,
-        #     hd          = config["feature_bc_config"]["hamming_distance"]
-        # ),
-        # "data/collapsed_barcodes_hd{}.fastq.gz".format(config["feature_bc_config"]["hamming_distance"]),
-        # expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
+        expand("results/01_counts/{sample}/outs/web_summary.html", sample = SAMPLES)
