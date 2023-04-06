@@ -1,14 +1,7 @@
 import gzip
 import re
 import pandas as pd
-from Bio import SeqIO
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
-
-# input_file  = "data/bc_filt/collapsed/CTR-rep1_FB_S1_L001_R2_001_Scarlet_collapsed-hd4.fastq.gz"
-# output_fastq = "data/bc_filt/collapsed/corrected.fastq.gz"
-# feature_ref   = "data/bc_filt/collapsed/feature_ref.csv"
-# color = "Scarlet"
-# read = "R2"
 
 input_file    = snakemake.input[0]
 output_fastq  = snakemake.output[0]
@@ -92,6 +85,11 @@ def write_corrected_fastq(output_fastq, reference_dict, fastq_entries):
 #------------------------------------------------------------------------------------------------------------------------------------
 # Main
 #------------------------------------------------------------------------------------------------------------------------------------
+# Create dict with reference barcodes, store fastq in list
 reference_dict, fastq_records = get_reference_barcodes(input_file)
+
+# Correct fastq file with reference barcodes and save output fastq
 write_corrected_fastq(output_fastq, reference_dict, fastq_records)
+
+# Generate a feature ref csv from the dictionary of reference barcodes
 create_feature_ref(reference_dict, color, read, feature_ref)

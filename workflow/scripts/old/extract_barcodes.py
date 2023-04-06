@@ -5,23 +5,9 @@ from Bio.SeqIO.QualityIO import FastqGeneralIterator
 #------------------------------------------------------------------------------------------------------------------------------------
 # Declare input/output files
 #------------------------------------------------------------------------------------------------------------------------------------
-input_fb  = snakemake.input[0]
-input_cb  = snakemake.input[0]
-output_fb = snakemake.output[0]
-output_cb = snakemake.output[1]
+input_file       = snakemake.input[0]
+output_fastqs    = snakemake.output
 barcode_patterns = snakemake.params[0]
-
-input_fb  = "data/CTR-rep1_FB_S1_L001_R2_001.fastq.gz"
-input_cb  = "data/CTR-rep1_FB_S1_L001_R1_001.fastq.gz"
-output_fb = ["data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_GFP.fastq.gz",
-             "data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_Sapphire.fastq.gz",
-             "data/bc_filt/CTR-rep1_FB_S1_L001_R2_001_Scarlet.fastq.gz"]
-output_cb = "data/bc_filt/CTR-rep1_FB_S1_L001_R1_001.fastq.gz"
-barcode_patterns = {
-    "TGCTAA....TG....CA....GT....AG...." : "GFP",
-    "GTTCCA....TG....CA....GT....AG...." : "Sapphire",
-    "AAGATT....TG....CA....GT....AG...." : "Scarlet"
-}
 
 
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -71,25 +57,9 @@ def extracted_bc_to_fq(output_fastqs, barcode_reads):
             for title, seq, qual in barcode_reads[key]:
                 _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
 
-def subset_cb_fastq(input_fastq, output_fastq, barcode_reads):
-    """
-    """
-    read_primer  = re.compile(r"\s.*$")
-    filtered_ids = {read_primer.sub('', fastq_record[0]) for larry_color in barcode_reads.values() for fastq_record in larry_color}
-
-    with gzip.open(input_fastq, 'rt') as input_handle, gzip.open(output_fastq, 'wt') as output_handle:
-        for title, seq, qual in FastqGeneralIterator(input_handle):
-            title_no_read_id = read_primer.sub('', title)
-            if title_no_read_id in filtered_ids:
-                _ = output_handle.write(f"@{title}\n{seq}\n+\n{qual}\n")
-                
 
 #------------------------------------------------------------------------------------------------------------------------------------
 # Main
 #------------------------------------------------------------------------------------------------------------------------------------
-# Filter reads containing barcodes from feature barcoding read and write to new fastq file
-barcode_reads = extract_barcodes(input_fb, barcode_patterns) 
-extracted_bc_to_fq(output_fb, barcode_reads)
-
-# Subset the other fastq (the one containing cellular barcodes) based on the read ids filtered before
-subset_cb_fastq(input_cb, output_cb, barcode_reads) 
+barcode_reads = extract_barcodes(input_file, barcode_patterns)
+extracted_bc_to_fq(output_fastqs, barcode_reads)
