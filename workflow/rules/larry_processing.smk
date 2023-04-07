@@ -42,7 +42,7 @@ rule collapse_fastq_hd:
     input:
         "data/bc_filt/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}.fastq.gz"
     output:
-        "data/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}.fastq.gz"
+        temp("data/collapsed/{sample}_FB_S1_L001_{read_fb}_001_{larry_color}_collapsed-hd{hd}.fastq.gz")
     log:
         "results/00_logs/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.log"
     benchmark:
