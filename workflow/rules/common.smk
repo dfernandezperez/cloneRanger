@@ -1,20 +1,6 @@
-from snakemake.utils import validate
 from pathlib import Path
-from yaml import safe_load
 import os 
 import sys
-
-# # Validate structures
-# with open(config["samples"], "r") as file:
-#     metadata = safe_load(file)
-# validate(metadata, schema="../schema/samples.schema.yaml")
-# validate(config, schema="../schema/config.schema.yaml")
-
-# # Some useful variables
-# LANES = list(metadata.keys())
-# SAMPLES = set()
-# for _, v in metadata.items():
-#     SAMPLES = SAMPLES.union(v.keys())
 
 # wildcard constraints to be sure that output names are defined properly
 wildcard_constraints:

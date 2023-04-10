@@ -1,19 +1,32 @@
 import pandas as pd
 import yaml
+from snakemake.utils import validate
 
 configfile: "config/config.yaml"
 
+
 #-----------------------------------------------------------------------------------------------------------------------
-# Load sample sheet and cluster configuration, config file
+# Load sample sheet and cluster configuration, config file and validate structures
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Load units
 units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "lib_type", "lane"], drop=False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
+
+# # Validate structures
+validate(units, schema="schema/units.schema.yaml")
+validate(config, schema="schema/config.schema.yaml")
+
 
 SAMPLES      = set(units["sample_id"])
 RESOURCES    = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
 LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
 LIB_TYPES    = set(units["lib_type"])
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Rules
+#-----------------------------------------------------------------------------------------------------------------------
 include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/counts.smk"

@@ -1,0 +1,53 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: Snakemake configuration file
+
+type: object
+
+properties:
+  units:
+    type: string
+    
+  resources:
+    type: string
+
+  cellranger_rna_sif:
+    description: Singularity image to execute cellranger count (RNA)
+    type       : string
+
+  cellranger_multiome_sif:
+    description: Singularity image to execute cellranger-arc count (RNA+ATAC)
+    type       : string
+
+  cellranger_atac_sif:
+    description: Singularity image to execute cellranger-atac count (ATAC)
+    type       : string
+
+  genome_reference_gex:
+    description: 10X reference genome for cellranger count
+    type       : string
+
+  genome_refrerence_arc:
+    description: 10X reference genome for cellranger-arc and cellranger-atac count
+    type       : string
+
+  10x_pipeline:
+    description: Type of 10X pipeline. Can be RNA alone (GEX), ATAC alone (ATAC) or multiome -RNA+ATAC- (ARC)
+    type       : string
+    enum       : [ GEX, ATAC, ARC]
+
+  cellranger_count:
+    type: object
+    properties:
+      introns: { type: boolean }
+      n_cells: { type: integer }
+      mem    : { type: integer }
+
+  feature_bc_config:
+    type: object
+    properties:
+      feature_bc      : { type: boolean, description: "Is there feature barcoding data?" }
+      read_feature_bc : { type: string, enum: ["R1", "R2"], description: "Read in which larry barcode is present" }
+      read_cellular_bc: { type: string, enum: ["R1", "R2"], description: "Read in which cellular barcode is present"  }
+      hamming_distance: { type: integer }
+      bc_patterns     : { type: object }

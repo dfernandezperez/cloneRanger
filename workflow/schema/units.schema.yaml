@@ -1,1 +1,37 @@
-$schema: "https://json-schema.org/draft-06/schema#"
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: row of the units.tsv, representing a sequencing unit, i.e. single-end or paired-end data
+
+type: object
+
+properties:
+  sample_id:
+    type       : string
+    description: sample name/id the unit has been sequenced from
+
+  lane:
+    type       : string
+    description: lane to which the FASTQ file belongs to
+
+  R1:
+    type       : string
+    description: path to R1 (forward) FASTQ file
+
+  R2:
+    type       : string
+    description: path to R2 (forward) FASTQ file
+
+  R3:
+    type       : string
+    description: path to R3 10X ATAC (corresponds to R2 -read 2-)
+
+  lib_type:
+    type       : string
+    description: 10x library type. Can be GEX (RNAseq), ATAC (ATACseq) or FB (feature barcoding)
+
+required:
+  - sample_id
+  - lane
+  - R1
+  - R2
+  - lib_type

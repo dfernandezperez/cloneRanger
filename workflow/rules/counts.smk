@@ -10,7 +10,7 @@ if config["10x_pipeline"] == "GEX":
                                 read=["R1", "R2"]
                             ),
                 libraries   = "data/feature_bc_libraries/{sample}_library.csv",
-                feature_ref = "data/feature_reference/Feature_reference.csv"
+                feature_ref = "data/feature_reference/Feature_reference.csv",
             output:
                 mtx  = "results/01_counts/{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
                 html = report(
