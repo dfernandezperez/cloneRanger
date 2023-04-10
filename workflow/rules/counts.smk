@@ -33,7 +33,7 @@ if config["10x_pipeline"] == "GEX":
             resources:
                 mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
             container: 
-                config["cellranger_sif"]
+                config["cellranger_rna_sif"]
             shell:
                 """
                 cellranger count \
@@ -79,7 +79,7 @@ if config["10x_pipeline"] == "GEX":
             resources:
                 mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
             container: 
-                config["cellranger_sif"]
+                config["cellranger_rna_sif"]
             shell:
                 """
                 cellranger count \
@@ -123,7 +123,7 @@ elif config["10x_pipeline"] == "ATAC":
         resources:
             mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
         container: 
-            config["cellranger_sif"]
+            config["cellranger_atac_sif"]
         shell:
             """
             cellranger-atac count \
@@ -139,7 +139,7 @@ elif config["10x_pipeline"] == "ATAC":
             mv {wildcards.sample} results/01_counts/{wildcards.sample}
         """
 
-elif config["10x_pipeline"] == "GEX_ATAC":
+elif config["10x_pipeline"] == "ARC":
     rule cellranger_count:
         input:
             fq = lambda w: expand(
@@ -169,7 +169,7 @@ elif config["10x_pipeline"] == "GEX_ATAC":
         resources:
             mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
         container: 
-            config["cellranger_sif"]
+            config["cellranger_multiome_sif"]
         shell:
             """
             cellranger-arc count \

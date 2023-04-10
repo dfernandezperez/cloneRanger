@@ -28,6 +28,19 @@ rule merge_lanes:
         cat {input.rv} > {output.rv} 2>> {log}
         """
 
+rule merge_lanes_atac:
+    input:
+        lambda w: expand("data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R3_001.fastq.gz", sample=units.loc[(w.sample, w.lib_type)].itertuples())
+    output:
+        "data/lane_merged/{sample}_{lib_type}_S1_L001_R3_001.fastq.gz"
+    log:
+        "results/00_logs/merge_lanes_atac/{sample}_{lib_type}.log"
+    shell:
+        """
+        cat {input} > {output} 2> {log}
+        """
+    
+
 rule move_gex_fq:
     # Dummy rule to move the gex fastq files to the "clean" folder, in which the collapsed feature barcoding
     # fastq files will be stored.
@@ -48,14 +61,17 @@ rule move_atac_fq:
     # fastq files will be stored.
     input:
         fw = "data/lane_merged/{sample}_ATAC_S1_L001_R1_001.fastq.gz",
-        rv = "data/lane_merged/{sample}_ATAC_S1_L001_R2_001.fastq.gz"
+        rv = "data/lane_merged/{sample}_ATAC_S1_L001_R2_001.fastq.gz",
+        r3 = "data/lane_merged/{sample}_ATAC_S1_L001_R3_001.fastq.gz"
     output:
         fw = "data/clean/{sample}_ATAC_S1_L001_R1_001.fastq.gz",
-        rv = "data/clean/{sample}_ATAC_S1_L001_R2_001.fastq.gz"
+        rv = "data/clean/{sample}_ATAC_S1_L001_R2_001.fastq.gz",
+        r3 = "data/clean/{sample}_ATAC_S1_L001_R3_001.fastq.gz"
     shell:
         """
         mv {input.fw} {output.fw}
         mv {input.rv} {output.rv}
+        mv {input.r3} {output.r3}
         """
 
 rule create_library:
