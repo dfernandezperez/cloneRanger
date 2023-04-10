@@ -6,12 +6,13 @@ configfile: "config/config.yaml"
 #-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file
 #-----------------------------------------------------------------------------------------------------------------------
-units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "feature_bc", "lane"], drop=False).sort_index()
+units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "lib_type", "lane"], drop=False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
 SAMPLES      = set(units["sample_id"])
 RESOURCES    = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
 LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
+LIB_TYPES    = set(units["lib_type"])
 
 include: "rules/common.smk"
 include: "rules/resources.smk"

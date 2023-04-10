@@ -1,18 +1,3 @@
-rule create_library:
-    input:
-        fb  = expand("data/clean/{{sample}}_FB_S1_L001_{read}_001.fastq.gz", read = ["R1", "R2"]),
-        gex = expand("data/clean/{{sample}}_GEX_S1_L001_{read}_001.fastq.gz", read = ["R1", "R2"])
-    output:
-        "data/feature_bc_libraries/{sample}_library.csv"
-    params:
-        feature_barcoding = get_library_type
-    shell:
-        """
-        echo "fastqs,sample,library_type" > {output}
-        echo "{params.feature_barcoding}" >> {output}
-        """
-
-
 rule extract_barcodes:
     input: 
         fb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_feature_bc"]),

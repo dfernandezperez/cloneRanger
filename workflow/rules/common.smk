@@ -2,6 +2,7 @@ from snakemake.utils import validate
 from pathlib import Path
 from yaml import safe_load
 import os 
+import sys
 
 # # Validate structures
 # with open(config["samples"], "r") as file:
@@ -22,12 +23,14 @@ wildcard_constraints:
     # reads corresponding to cellular barcode and feature barcode can only be R1 or R2
     read_fb="R[12]",
     read_cb="R[12]",
+    # lib type can be just ATAC, GEX or FB
+    lib_type='|'.join([x for x in ["ATAC", "GEX", "FB"]])
 
 
 # Input functions
 def get_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
-    return units.loc[(wildcards.sample, wildcards.feature_bc, wildcards.lane), ["R1", "R2"]].dropna()
+    return units.loc[(wildcards.sample, wildcards.lib_type, wildcards.lane), ["R1", "R2"]].dropna()
 
 def convert_introns():
     """Specify whether introns should be counted
@@ -35,10 +38,21 @@ def convert_introns():
     For ease of use, the user only specifies True or False
     This function handles the conversion.
     """
-    if not config["cellranger_count"]["introns"]:
-        return "--include-introns False"
-    else:
-        return ""
+    if config["10x_pipeline"] == "GEX":
+        if not config["cellranger_count"]["introns"]:
+            return "--include-introns False"
+        else:
+            return ""
+
+    elif config["10x_pipeline"] == "GEX_ATAC":
+        if not config["cellranger_count"]["introns"]:
+            return "--gex-exclude-introns"
+        else:
+            return ""
+    
+    else: 
+        sys.exit("Intronic use can be only specified if 10x_pipeline == GEX or GEX_ATAC")
+
 
 def is_feature_bc():
     """Specify whether feature barcoding has been performed
@@ -50,19 +64,23 @@ def is_feature_bc():
         return False
 
 def get_library_type(wildcards):
-    """Create the content of library.csv for the feature barcoding pipeline
+    """Create the content of library.csv for the feature barcoding and multiome pipeline
     from cellranger.
     
-    Based on what is written in the column feature_bc from the units file,
+    Based on what is written in the column lib_type from the units file,
     write the following: "fastq folder,fastq name,library type".
     """
     abs_path            = os.getcwd()
-    feature_barcode_col = set( units.loc[(wildcards.sample), "feature_bc"] )
+    feature_barcode_col = set( units.loc[(wildcards.sample), "lib_type"] )
+    lib_types           = dict()
 
-    lib_types = {
-        'GEX': abs_path + '/data/clean,' + wildcards.sample + '_GEX,Gene Expression', 
-        'FB' : abs_path + '/data/clean,' + wildcards.sample + '_FB,Custom'
-    }
+    for fb in feature_barcode_col:
+        if fb == 'GEX':
+            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Gene Expression'
+        if fb == 'FB':
+            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Custom'
+        if fb == 'ATAC':
+            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Chromatin Accessibility'
 
     fb_names = [lib_types.get(fb) for fb in feature_barcode_col]
     return '\n'.join(fb_names)
@@ -87,6 +105,7 @@ def agg_fastqc():
     return dict(
         fastqc=fastq_out,
     )
+
 
 def get_qc_data(wildcards):
     """Get all QC'd data, grouped by lane, for SOLO."""

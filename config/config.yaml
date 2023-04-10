@@ -2,8 +2,13 @@ units    : config/units.tsv
 resources: config/resources.yaml
 
 # Singularity images, reference genome, library and feature-ref (last 2 in case feature barcoding is performed)
-cellranger_sif  : /stemcell/data/Singularity_images/cellranger_7.0.0.sif
-genome_reference: /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-A
+cellranger_sif          : /stemcell/data/Singularity_images/cellranger_7.0.0.sif
+cellranger_multiome_sif : /stemcell/data/Singularity_images/cellranger_7.0.0.sif
+genome_reference_gex    : /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-A
+genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellranger-arc-mm10-2020-A-2.0.0
+
+# 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
+10x_pipeline : "GEX"
 
 # Cellranger count parameters
 cellranger_count:
