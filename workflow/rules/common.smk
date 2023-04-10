@@ -32,6 +32,10 @@ def get_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
     return units.loc[(wildcards.sample, wildcards.lib_type, wildcards.lane), ["R1", "R2"]].dropna()
 
+def get_atac_fastqs(wildcards):
+    """Return all FASTQS specified in sample metadata."""
+    return units.loc[(wildcards.sample, wildcards.lib_type, wildcards.lane), ["R3"]].dropna()
+
 def convert_introns():
     """Specify whether introns should be counted
 
@@ -44,7 +48,7 @@ def convert_introns():
         else:
             return ""
 
-    elif config["10x_pipeline"] == "GEX_ATAC":
+    elif config["10x_pipeline"] == "ARC":
         if not config["cellranger_count"]["introns"]:
             return "--gex-exclude-introns"
         else:

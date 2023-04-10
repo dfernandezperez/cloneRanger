@@ -13,10 +13,28 @@ rule clean_names:
         ln -s {input[1]} {output.rv}
         """
 
+rule clean_names_atac:
+    input:
+        get_atac_fastqs,
+    output:
+        temp("data/symlink/{sample}_{lib_type}_S1_L00{lane}_R3_001.fastq.gz"),
+    container:
+        None
+    shell:
+        """
+        ln -s {input} {output}
+        """
+
 rule merge_lanes:
     input:
-        fw = lambda w: expand("data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R1_001.fastq.gz", sample=units.loc[(w.sample, w.lib_type)].itertuples()),
-        rv = lambda w: expand("data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R2_001.fastq.gz", sample=units.loc[(w.sample, w.lib_type)].itertuples())
+        fw = lambda w: expand(
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R1_001.fastq.gz", 
+            sample=units.loc[(w.sample, w.lib_type)].itertuples()
+            ),
+        rv = lambda w: expand(
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R2_001.fastq.gz", 
+            sample=units.loc[(w.sample, w.lib_type)].itertuples()
+            )
     output:
         fw = "data/lane_merged/{sample}_{lib_type}_S1_L001_R1_001.fastq.gz",
         rv = "data/lane_merged/{sample}_{lib_type}_S1_L001_R2_001.fastq.gz"
@@ -30,7 +48,10 @@ rule merge_lanes:
 
 rule merge_lanes_atac:
     input:
-        lambda w: expand("data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R3_001.fastq.gz", sample=units.loc[(w.sample, w.lib_type)].itertuples())
+        lambda w: expand(
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R3_001.fastq.gz", 
+            sample=units.loc[(w.sample, w.lib_type)].itertuples()
+            )
     output:
         "data/lane_merged/{sample}_{lib_type}_S1_L001_R3_001.fastq.gz"
     log:
@@ -40,7 +61,6 @@ rule merge_lanes_atac:
         cat {input} > {output} 2> {log}
         """
     
-
 rule move_gex_fq:
     # Dummy rule to move the gex fastq files to the "clean" folder, in which the collapsed feature barcoding
     # fastq files will be stored.

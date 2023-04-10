@@ -142,10 +142,15 @@ elif config["10x_pipeline"] == "ATAC":
 elif config["10x_pipeline"] == "ARC":
     rule cellranger_count:
         input:
-            fq = lambda w: expand(
-                            "data/clean/{lane.sample_id}_{lane.lib_type}_S1_L001_{read}_001.fastq.gz", 
-                            lane=units.loc[w.sample].itertuples(), 
+            fq_gex  = expand(
+                            "data/clean/{sample}_GEX_S1_L001_{read}_001.fastq.gz", 
+                            sample = SAMPLES, 
                             read=["R1", "R2"]
+                        ),
+            fq_atac = expand(
+                            "data/clean/{sample}_ATAC_S1_L001_{read}_001.fastq.gz", 
+                            sample = SAMPLES, 
+                            read=["R1", "R2", "R3"]
                         ),
             libraries   = "data/feature_bc_libraries/{sample}_library.csv"
         output:
