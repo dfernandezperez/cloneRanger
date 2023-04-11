@@ -31,6 +31,7 @@ include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/counts.smk"
 include: "rules/larry_processing.smk"
+include: "rules/preprocessing.smk"
 
 # Define target files based on pipeline
 if config["10x_pipeline"] == "GEX":
@@ -40,4 +41,5 @@ elif config["10x_pipeline"] in ["ARC", "ATAC"]:
 
 rule all:
     input:
-        target_files
+        # target_files,
+        "results/02_createSeurat/seurat_allCells.rds"

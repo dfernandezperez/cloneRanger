@@ -5,3 +5,4 @@ latency-wait     : 60
 keep-going       : true
 use-singularity  : true
 singularity-args : "--bind /stemcell"
+--use-conda      : true

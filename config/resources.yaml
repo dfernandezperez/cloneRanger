@@ -1,6 +1,6 @@
 # Maxmem has to be specified in megabytes (To transform gb to mb just do gb*1000)
 cellranger_count:
-    cpu : 90
+    cpu   : 90
     MaxMem: 128000
 
 collapse_fastq_hd:
@@ -11,3 +11,7 @@ correct_barcodes:
 
 extract_barcodes:
     MaxMem: 16000
+
+create_seurat:
+    cpu   : 5
+    MaxMem: 100000

@@ -10,3 +10,4 @@ pid.txt
 .vscode/
 snakemake.err
 snakemake.log
+.RData

@@ -33,3 +33,8 @@ feature_bc_config:
     "TGCTAA....TG....CA....GT....AG...." : "GFP"
     "GTTCCA....TG....CA....GT....AG...." : "Sapphire"
     "AAGATT....TG....CA....GT....AG...." : "Scarlet"
+
+# Parameters regarding preprocessing of Seurat object
+preprocessing:
+  # Min number of cells that must express a feature (gene or larry bc) to include it in the final matrix
+  min_cells: 5
