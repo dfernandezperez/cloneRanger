@@ -11,6 +11,9 @@ genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellra
 # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
 10x_pipeline : "GEX"
 
+# human or mouse
+species: "mouse"
+
 # Cellranger count parameters
 cellranger_count:
   introns: True
@@ -37,4 +40,26 @@ feature_bc_config:
 # Parameters regarding preprocessing of Seurat object
 preprocessing:
   # Min number of cells that must express a feature (gene or larry bc) to include it in the final matrix
-  min_cells: 5
+  min_cells   : 5
+  mito_pattern: "^mt-"
+  ribo_pattern: "^Rpl|^Rps"
+  marker_genes:
+    - Procr
+    - Mecom
+    - Pf4
+    - Elane
+    - Flt3
+    - Lyz2
+    - Akr1c13
+    - Ctsg
+    - Car1
+    - Ms4a2
+    - Mki67
+    - Plac8
+    - Mcpt8
+    - Mmp16
+    - Ncam2
+    - Tgfbr3
+    - Nupr
+    - Rnf220
+    - Clu

@@ -3,7 +3,7 @@ import yaml
 from snakemake.utils import validate
 
 configfile: "config/config.yaml"
-
+container : "docker://condaforge/mambaforge:4.10.3-6"
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file and validate structures
@@ -42,4 +42,5 @@ elif config["10x_pipeline"] in ["ARC", "ATAC"]:
 rule all:
     input:
         # target_files,
-        "results/02_createSeurat/seurat_allCells.rds"
+        # "results/02_createSeurat/seurat_allCells.rds",
+        "results/03_qc/seurat_qc.html"

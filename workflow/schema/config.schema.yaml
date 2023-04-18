@@ -11,6 +11,11 @@ properties:
   resources:
     type: string
 
+  species:
+    description: Sample species
+    type       : string
+    enum       : [human, mouse]
+
   cellranger_rna_sif:
     description: Singularity image to execute cellranger count (RNA)
     type       : string

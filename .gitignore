@@ -11,3 +11,5 @@ pid.txt
 snakemake.err
 snakemake.log
 .RData
+.conda
+.condarc

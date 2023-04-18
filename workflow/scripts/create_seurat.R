@@ -59,6 +59,12 @@ remove_doublets <- function(seurat, cores = 1) {
 seurat <- create_seurat(unlist(snakemake@input), snakemake@params[["sample_names"]], snakemake@params[["min_cells"]])
 seurat <- remove_doublets(seurat, cores = snakemake@threads[[1]])
 
+# Add mitochondrial and ribosomal RNA metrics
+mito_pattern             <- snakemake@params[["mito_pattern"]]
+ribo_pattern             <- snakemake@params[["ribo_pattern"]]
+seurat[["percent.mt"]]   <- PercentageFeatureSet(seurat, pattern = mito_pattern)
+seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = ribo_pattern)
+
 # Filter doublets and save object
 seurat_clean <- subset(seurat, subset = scDblFinder.class == "singlet")
 saveRDS(seurat_clean, snakemake@output[["no_doublets"]])
