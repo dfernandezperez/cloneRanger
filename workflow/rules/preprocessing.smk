@@ -26,9 +26,9 @@ rule qc:
     input:
         "results/02_createSeurat/seurat_noDoublets.rds"
     output:
-        html        = "results/03_qc/seurat_qc.html",
-        clust_degs  = "results/03_qc/cluster_degs.tsv",
-        sample_degs = "results/03_qc/sample_degs.tsv"
+        html          = "results/03_qc/seurat_sneakPeak.html",
+        cluster_degs  = "results/03_qc/cluster_degs.tsv",
+        sample_degs   = "results/03_qc/sample_degs.tsv"
     params:
         marker_genes = config["preprocessing"]["marker_genes"],
         species      = config["species"]
@@ -43,4 +43,4 @@ rule qc:
     benchmark:
         "results/benchmarks/qc/benchmark.txt"
     script:
-        "../scripts/qc.Rmd"
+        "../scripts/mini_report.Rmd"
