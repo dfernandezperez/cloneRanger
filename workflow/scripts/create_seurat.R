@@ -13,15 +13,15 @@ library(SingleCellExperiment)
 #-----------------------------------------------------------------------------------------------------------------------
 # Create seurat object
 #-----------------------------------------------------------------------------------------------------------------------
-create_seurat <- function(input_files, sample_names, min.cells = 1) {
+create_seurat <- function(input_files, sample_names, min_cells_gene = 1, min_cells_larry = 1) {
 
 	# Load files
 	names(input_files) <- sample_names
 	data               <- Read10X(data.dir = input_files)
 
 	# Create seurat objects
-	seurat            <- CreateSeuratObject(counts = data$`Gene Expression`, min.cells = min.cells)
-	seurat[['Larry']] <- CreateAssayObject(counts = data$`Custom`, min.cells = min.cells)
+ seurat <- CreateSeuratObject(counts = data$`Gene Expression`, min.cells = min_cells_gene)
+ seurat[["Larry"]] <- CreateAssayObject(counts = data$`Custom`, min.cells = min_cells_larry)
 
 	# Fix sample names
 	samples_names        <- seurat$orig.ident %>% names() %>% gsub("_[A,C,G,T]*-1", "", .)
@@ -56,7 +56,12 @@ remove_doublets <- function(seurat, cores = 1) {
 # Main & save output
 #-----------------------------------------------------------------------------------------------------------------------
 # Create seurat object & calculate doublets
-seurat <- create_seurat(unlist(snakemake@input), snakemake@params[["sample_names"]], snakemake@params[["min_cells"]])
+seurat <- create_seurat(
+	unlist(snakemake@input), 
+	snakemake@params[["sample_names"]], 
+	snakemake@params[["min_cells_gene"]],
+	snakemake@params[["min_cells_larry"]]
+	)
 seurat <- remove_doublets(seurat, cores = snakemake@threads[[1]])
 
 # Add mitochondrial and ribosomal RNA metrics

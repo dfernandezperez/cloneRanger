@@ -1,0 +1,241 @@
+---
+title: "Quick barcode exploration"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    fig_caption: yes
+    df_print: paged
+    highlight: tango
+    number_sections: no
+    theme: flatly
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r knitr, include = FALSE}
+knitr::opts_chunk$set(
+    echo           = TRUE,
+    error          = FALSE,
+    fig.align      = "center",
+    message        = FALSE,
+    warning        = FALSE,
+    fig.width      = 10,
+    fig.height     = 8
+)
+```
+
+```{r logs}
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log)
+sink(log, type = "message")
+```
+
+```{r libraries}
+library(Seurat)
+library(data.table)
+library(BiocParallel)
+library(stringr)
+library(glue)
+library(tidyverse)
+source("workflow/scripts/functions.R")
+source("workflow/scripts/barcode_qc/clone_calling_functions.R")
+```
+
+```{r input-files-and-params}
+input_file    <- snakemake@input[[1]]
+barcode_names <- snakemake@params[["barcodes"]]
+count_max_threshold <- 20
+```
+
+```{r load-seurat}
+seurat <- readRDS(input_file)
+```
+
+
+# Introduction
+
+In this document you will find some exploratory plots regarding the distribution of larry barcodes in this single-cell experiment.
+
+
+# Barcode summary table {.tabset}
+
+Summary metrics of the barcodes across the experiment based on different count thresholds:
+
+```{r split-larry-matrices-set-thresholds}
+bc_df <- get_bc_df(split_matrices_barcodes(seurat, barcode_names))
+
+q_counts <- 0.075
+barcodes_df_threshold <- rbindlist(lapply(
+    bc_df,
+    function(barcode) {
+        data.frame(cutoff = ceiling(quantile(
+            as.numeric(names(table(barcode$counts))),
+            q_counts
+        )))
+    }
+), idcol = "Barcode")
+
+thresholds <- as.character(barcodes_df_threshold$cutoff)
+thresholds <- paste(thresholds, collapse = ", ")
+```
+
+```{r barcode-summary, results = 'asis'}
+bc_sum_l <- map(0:count_max_threshold, 
+				\(threshold) get_barcode_summary(bc_df, threshold) %>%
+					knitr::kable()
+				)
+names(bc_sum_l) <- paste0(0:count_max_threshold, " counts")
+
+in_tabs(bc_sum_l, level = 1L)
+```
+
+# Summary counts per barcode {.tabset}
+
+Summary plots showing a rank-plot and violin plot of the distribution of counts of the barcodes detected across all cells. 
+```{r summary-counts-per-bc, results = 'asis', fig.width=7.5, fig.height=7}
+bc_count_distribution_plots <- function(bc_df_l, threshold) {
+  
+  barcodes_df_distrib <- imap(
+    bc_df_l, 
+    \(x, y) x %>% 
+      dplyr::filter(counts > threshold) %>% 
+      dplyr::arrange(desc(counts)) %>%
+      dplyr::mutate(index = 1:nrow(.)) %>% 
+      dplyr::mutate(Barcode = y) %>% 
+      dplyr::select(Barcode, counts, index)
+    ) %>% 
+    bind_rows()
+  
+  p1 <- ggplot(barcodes_df_distrib, aes(x = index, y = counts, color = Barcode)) + 
+    geom_point(size = 0.1) +
+    facet_wrap(~ Barcode, scales = "free") + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 60, vjust = 0.5)) +
+    xlab("rank of expression barcode/cell") +
+    ggtitle(glue("Expression of barcode/cell: counts >= {threshold}"))
+  
+  p2 <- ggplot(barcodes_df_distrib, aes(x = Barcode, y = counts, fill = Barcode)) + 
+    geom_violin() + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    xlab("rank of expression barcode/cell") +
+    ggtitle(glue("Distribution of counts in barcode/cell: counts >= {threshold}"))
+  
+  plots <- p1 / p2
+  
+  return(plots)
+
+}
+
+bc_plot_l <- map(0:count_max_threshold, \(threshold) bc_count_distribution_plots(bc_df, threshold))
+names(bc_plot_l) <- paste0(0:count_max_threshold, " counts")
+
+in_tabs(bc_plot_l, level = 1L)
+```
+
+# Summary barcodes per cell {.tabset}
+
+Representation of the number of barcodes detected per cell based on different thresholds.
+
+```{r summary-bcs-per-cell, results = 'asis', fig.width=7.5, fig.height=7}
+bc_cell_distribution_plots <- function(bc_df_l, threshold) {
+  
+  barcodes_cell_distrib <- imap(
+    bc_df_l, 
+    \(x, y) x %>% 
+      dplyr::filter(counts > threshold) %>% 
+      dplyr::count(cells) %>% 
+      dplyr::arrange(desc(n)) %>%
+      dplyr::mutate(index = 1:nrow(.)) %>% 
+      dplyr::mutate(Barcode = y) %>%
+      dplyr::rename(n_barcodes = n) %>% 
+      dplyr::select(Barcode, cells, n_barcodes, index)
+    ) %>% 
+    bind_rows()
+  
+  p1 <- ggplot(barcodes_cell_distrib, aes(x = index, y = n_barcodes, color = Barcode)) + 
+    geom_point(size = 0.1) + facet_wrap(~ Barcode, scales = "free") + 
+    scale_color_manual(values = c("green", "blue", "red")) + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 60, vjust = 0.5)) +
+    xlab("ranking of cells") + ylab("number of barcodes") + 
+    ggtitle(glue("Number of barcodes in each cell: counts >= {threshold}"))
+
+    
+  p2 <- ggplot(barcodes_cell_distrib, aes(x = Barcode, y = n_barcodes, fill = Barcode)) + 
+    geom_violin() + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    ggtitle(glue("Distribution of counts in barcode/cell: counts >= {threshold}"))
+  
+  plots <- p1 / p2
+  
+  return(plots)
+  
+}
+
+
+bc_cell_plot_l <- map(0:count_max_threshold, \(threshold) bc_cell_distribution_plots(bc_df, threshold))
+names(bc_cell_plot_l) <- paste0(0:count_max_threshold, " counts")
+
+in_tabs(bc_cell_plot_l, level = 1L)
+```
+
+# Summary barcode sizes {.tabset}
+
+Here you can find plots regarding the barcode sizes, which corresponds to the number of cells that contain a particular barcode.
+
+```{r summary, results = 'asis', fig.width=7.5, fig.height=7}
+bc_size_distribution_plots <- function(bc_df_l, threshold) {
+  
+  barcodes_size_distrib <- imap(
+    bc_df_l, 
+    \(x, y) x %>% 
+      dplyr::filter(counts > threshold) %>%
+      dplyr::group_by(barcodes) %>% 
+      dplyr::count() %>% 
+      dplyr::ungroup() %>% 
+      dplyr::arrange(desc(n)) %>%
+      dplyr::mutate(index = 1:nrow(.)) %>% 
+      dplyr::mutate(Barcode = y) %>%
+      dplyr::rename(n_cells = n)
+    ) %>% 
+    bind_rows()
+  
+  p1 <- ggplot(barcodes_size_distrib, aes(x = index, y = n_cells, color = Barcode)) + 
+    geom_point(size = 0.1) + facet_wrap(~ Barcode, scales = "free") + 
+    scale_color_manual(values = c("green", "blue", "red")) + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 60, vjust = 0.5)) +
+    xlab("ranking of barcodes") + ylab("number of cells") + 
+    ggtitle(glue("Barcode size (N cells with barcode): counts >= {threshold})"))
+
+    
+  p2 <- ggplot(barcodes_size_distrib, aes(x = Barcode, y = n_cells, fill = Barcode)) + 
+    geom_violin() + 
+    theme_bw() + scale_y_log10() + 
+    theme(legend.position = "none", 
+          axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    ggtitle(glue("Distribution of barcode sizes (N cells with barcode): counts >= {threshold}"))
+  
+  plots <- p1 / p2
+  
+  return(plots)
+  
+}
+
+bc_cell_plot_l <- map(0:count_max_threshold, \(threshold) bc_size_distribution_plots(bc_df, threshold))
+names(bc_cell_plot_l) <- paste0(0:count_max_threshold, " counts")
+
+in_tabs(bc_cell_plot_l, level = 1L)
+```
+

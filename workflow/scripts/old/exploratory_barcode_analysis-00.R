@@ -43,6 +43,16 @@ thresholds <- as.character(OCIAML3_barcodes_df_threshold$cutoff)
 thresholds <- paste(thresholds, collapse = ", ")
 
 
+# Diversity ---------------------------------------------------------------
+
+OCIAML3_barcodes_df_div <- rbindlist(lapply(OCIAML3_barcodes_df, 
+                                            function(barcode) {
+  data.frame(unique(barcode[barcode$counts > 1, 2]))
+}), idcol = "Barcode")
+
+table(OCIAML3_barcodes_df_div$Barcode)
+
+
 # Summary metrics ---------------------------------------------------------
 
 OCIAML3_barcodes_df_summ <- rbindlist(lapply(OCIAML3_barcodes_df, function(df) {
@@ -52,5 +62,7 @@ OCIAML3_barcodes_df_summ <- rbindlist(lapply(OCIAML3_barcodes_df, function(df) {
              q0.75 = quantile(df$counts[df$counts > 1], 3/4))
 }))
 OCIAML3_barcodes_df_summ
+
+
 
 

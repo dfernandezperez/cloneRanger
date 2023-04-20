@@ -40,10 +40,11 @@ feature_bc_config:
 # Parameters regarding preprocessing of Seurat object
 preprocessing:
   # Min number of cells that must express a feature (gene or larry bc) to include it in the final matrix
-  min_cells   : 5
-  mito_pattern: "^mt-"
-  ribo_pattern: "^Rpl|^Rps"
-  marker_genes:
+  min_cells_gene : 5
+  min_cells_larry: 2
+  mito_pattern   : "^mt-"
+  ribo_pattern   : "^Rpl|^Rps"
+  marker_genes   :
     - Procr
     - Mecom
     - Pf4
@@ -63,3 +64,4 @@ preprocessing:
     - Nupr
     - Rnf220
     - Clu
+    - Trpp53

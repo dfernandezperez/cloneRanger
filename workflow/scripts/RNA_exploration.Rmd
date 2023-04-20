@@ -45,8 +45,8 @@ source("workflow/scripts/functions.R")
 input_file   <- snakemake@input[[1]]
 marker_genes <- snakemake@params[["marker_genes"]]
 species      <- snakemake@params[["species"]]
-cluster_degs <- snakemake@output[["cluster_degs"]]
-sample_degs  <- snakemake@output[["sample_degs"]]
+cluster_degs <- snakemake@params[["cluster_degs"]]
+sample_degs <- snakemake@params[["sample_degs"]]
 ```
 
 ```{r load-seurat}

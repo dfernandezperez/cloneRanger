@@ -5,10 +5,11 @@ rule create_seurat:
         no_doublets = "results/02_createSeurat/seurat_noDoublets.rds",
         raw         = "results/02_createSeurat/seurat_allCells.rds"
     params:
-        sample_names = SAMPLES,
-        min_cells    = config["preprocessing"]["min_cells"],
-        mito_pattern = config["preprocessing"]["mito_pattern"],
-        ribo_pattern = config["preprocessing"]["ribo_pattern"],
+        sample_names    = SAMPLES,
+        min_cells_gene  = config["preprocessing"]["min_cells_gene"],
+        min_cells_larry = config["preprocessing"]["min_cells_larry"],
+        mito_pattern    = config["preprocessing"]["mito_pattern"],
+        ribo_pattern    = config["preprocessing"]["ribo_pattern"],
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -22,16 +23,36 @@ rule create_seurat:
     script:
         "../scripts/create_seurat.R"
 
-rule qc:
+rule RNA_exploration:
     input:
         "results/02_createSeurat/seurat_noDoublets.rds"
     output:
-        html          = "results/03_qc/seurat_sneakPeak.html",
-        cluster_degs  = "results/03_qc/cluster_degs.tsv",
-        sample_degs   = "results/03_qc/sample_degs.tsv"
+        html          = "results/03_RNA-exploration/RNA_exploration.html"
     params:
-        marker_genes = config["preprocessing"]["marker_genes"],
-        species      = config["species"]
+        marker_genes  = config["preprocessing"]["marker_genes"],
+        species       = config["species"],
+        cluster_degs  = "results/03_RNA-exploration/cluster_degs.tsv",
+        sample_degs   = "results/03_RNA-exploration/sample_degs.tsv"
+    conda:
+         "../envs/Seurat.yaml"
+    threads:
+        RESOURCES["create_seurat"]["cpu"]
+    resources:
+        mem_mb = RESOURCES["create_seurat"]["MaxMem"]
+    log:
+        "results/00_logs/RNA_exploration/log"
+    benchmark:
+        "results/benchmarks/RNA_exploration/benchmark.txt"
+    script:
+        "../scripts/RNA_exploration.Rmd"
+
+rule barcode_exploration:
+    input:
+        "results/02_createSeurat/seurat_noDoublets.rds"
+    output:
+        html = "results/04_barcode-exploration/barcode_exploration.html"
+    params:
+        barcodes = LARRY_COLORS
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -43,4 +64,4 @@ rule qc:
     benchmark:
         "results/benchmarks/qc/benchmark.txt"
     script:
-        "../scripts/mini_report.Rmd"
+        "../scripts/barcode_exploration.Rmd"
