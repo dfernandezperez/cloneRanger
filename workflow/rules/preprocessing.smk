@@ -27,7 +27,7 @@ rule RNA_exploration:
     input:
         "results/02_createSeurat/seurat_noDoublets.rds"
     output:
-        html          = "results/03_RNA-exploration/RNA_exploration.html"
+        html = "results/03_RNA-exploration/RNA_exploration.html"
     params:
         marker_genes  = config["preprocessing"]["marker_genes"],
         species       = config["species"],

@@ -46,7 +46,7 @@ input_file   <- snakemake@input[[1]]
 marker_genes <- snakemake@params[["marker_genes"]]
 species      <- snakemake@params[["species"]]
 cluster_degs <- snakemake@params[["cluster_degs"]]
-sample_degs <- snakemake@params[["sample_degs"]]
+sample_degs  <- snakemake@params[["sample_degs"]]
 ```
 
 ```{r load-seurat}
@@ -78,6 +78,8 @@ seurat <- seurat %>%
   FindClusters() %>%
   RunUMAP(dims = 1:n_pcs, n.neighbors = k, min.dist = 0.3) %>%
   CellCycleScoring(s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+
+Idents(seurat) <- seurat$seurat_clusters
 ```
 
 # Mitochondrial and Ribosomal RNA by sample
