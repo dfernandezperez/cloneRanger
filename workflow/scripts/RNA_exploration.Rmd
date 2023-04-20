@@ -176,7 +176,7 @@ in_tabs(plots, level = 1L)
 ```{r diff-exp-sample, results='asis', fig.width = 9.5, fig.height = 13}
 Idents(seurat)  <- seurat$sample
 sample_markers <- FindAllMarkers(seurat, only.pos = T, logfc.threshold = 0.25)
-write_tsv(cluster_markers, sample_degs)
+write_tsv(sample_markers, sample_degs)
 Idents(seurat)  <- seurat$seurat_clusters
 
 top_9_markers <- sample_markers %>% 
