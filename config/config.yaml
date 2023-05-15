@@ -1,8 +1,9 @@
-units    : config/units.tsv
-resources: config/resources.yaml
+units       : config/units.tsv
+resources   : config/resources.yaml
+cell_hashing: config/cell_hashing.yaml
 
 # Singularity images, reference genome, library and feature-ref (last 2 in case feature barcoding is performed)
-cellranger_rna_sif      : /stemcell/data/Singularity_images/cellranger_7.0.0.sif
+cellranger_rna_sif      : /stemcell/data/Singularity_images/cellranger_7.1.0.sif
 cellranger_multiome_sif : /stemcell/data/Singularity_images/cellranger_arc_2.0.2.sif
 cellranger_atac_sif     : /stemcell/data/Singularity_images/cellranger_atac_2.1.0.sif
 genome_reference_gex    : /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-A
@@ -11,14 +12,40 @@ genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellra
 # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
 10x_pipeline : "GEX"
 
+
 # human or mouse
 species: "mouse"
+
 
 # Cellranger count parameters
 cellranger_count:
   introns: True
-  n_cells: 8000
+  # Set auto for default cellranger expected number of cells. JUST FOR ATAC OR ARC
+  # FOR RNA SPECIFY THE NUMBER OF CELLS IN extra_parameters_rna (default = auto).
+  n_cells: "auto"
   mem: 120
+  extra_parameters_atac: "--nosecondary"
+# When cell hashing is applied all the configuration must be introduced in a different way
+# respect to the standard cellranger pipeline. Until I find a nice workaround for this,
+# all the RNA (gex) pipelines will be executed with cellranger multi to make the pipeline
+# less complex:
+# the cellranger settings when cellhashing is being used MUST be specified here. The parameters:
+# expect-cells,<int>
+# force-cells,<int>
+# no-secondary,<true|false>
+# no-bam,<true|false>
+# check-library-compatibility,<true|false>
+# target-panel,/path/to/target/panel, # Required, Targeted GEX only.
+# no-target-umi-filter,<true|false>, # Optional, Targeted GEX only.
+# include-introns,<true|false>
+# min-assignment-confidence,<0.9>, # Optional, Cell Multiplexing only.
+# cmo-set,/path/to/CMO/reference, # Optional, Cell Multiplexing only.
+# barcode-sample-assignment,/path/to/barcode-sample-assignment/csv, # Optional, Cell Multiplexing 
+  extra_parameters_rna:
+    - no-secondary,true
+    - include-introns,true
+    - min-assignment-confidence,0.7
+
 
 # feature barcodoing parameters/settings
 feature_bc_config:
@@ -33,14 +60,15 @@ feature_bc_config:
   # Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
   # Special characters won't be escaped.  
   bc_patterns:
-    "TGCTAA....TG....CA....GT....AG...." : "GFP"
-    "GTTCCA....TG....CA....GT....AG...." : "Sapphire"
-    "AAGATT....TG....CA....GT....AG...." : "Scarlet"
+    "GCTGAA....TG....CA....GT....AG...." : "Scarlet"
+
 
 # Parameters regarding preprocessing of Seurat object
 preprocessing:
-  # Min number of cells that must express a feature (gene or larry bc) to include it in the final matrix
+  # Min number of cells that must express a gene to include it in the final matrix
   min_cells_gene : 5
+  # Min number of cells that must express a larry bc to include it in the final matrix
+  # If there is not larry barcode in the samples this parameter will be ignored
   min_cells_larry: 2
   mito_pattern   : "^mt-"
   ribo_pattern   : "^Rpl|^Rps"
@@ -61,7 +89,8 @@ preprocessing:
     - Mmp16
     - Ncam2
     - Tgfbr3
+    - Tcf15
     - Nupr
     - Rnf220
     - Clu
-    - Trpp53
+    - Tppp3

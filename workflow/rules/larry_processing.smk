@@ -17,6 +17,8 @@ rule extract_barcodes:
         "results/00_logs/extract_barcodes/{sample}.log"
     benchmark:
         "results/benchmarks/extract_barcodes/{sample}.txt"
+    conda:
+         "../envs/python.yaml"
     resources:
         mem_mb = RESOURCES["extract_barcodes"]["MaxMem"]
     script:
@@ -34,9 +36,11 @@ rule collapse_fastq_hd:
         "results/benchmarks/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
         mem_mb = RESOURCES["collapse_fastq_hd"]["MaxMem"]
+    container:
+        "docker://dfernand/umicollapse:07506e661496033ca059e04a7771633b7b70721f"
     shell:
         """
-        /home/dfernandezp/miniconda3/bin/java -Xmx200G -Xss1G -jar /stemcell/scratch/dfernandezp/IndranilSingh/drug_screening_rabseq/software/UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
+        java -Xmx200G -Xss1G -jar /UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
         """
 
 
@@ -52,6 +56,8 @@ rule correct_barcodes:
         "results/benchmarks/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
         mem_mb = RESOURCES["correct_barcodes"]["MaxMem"]
+    conda:
+         "../envs/python.yaml"
     script:
         "../scripts/correct_barcodes.py"
 
@@ -88,5 +94,7 @@ rule generate_feature_ref:
         "data/feature_reference/Feature_reference.csv"
     log:
         "results/00_logs/generate_feature_ref/log"
+    conda:
+        "../envs/Seurat.yaml"
     script:
         "../scripts/generate_feature_ref.R"

@@ -1,15 +1,17 @@
 rule create_seurat:
     input:
-        expand("results/01_counts/{sample}/outs/filtered_feature_bc_matrix/", sample = SAMPLES)
+        expand("results/01_counts/{sample}/outs/per_sample_outs/", sample = SAMPLES)
     output:
         no_doublets = "results/02_createSeurat/seurat_noDoublets.rds",
         raw         = "results/02_createSeurat/seurat_allCells.rds"
     params:
-        sample_names    = SAMPLES,
+        sample_names    = SUBSAMPLES,
+        is_larry        = "TRUE" if is_feature_bc() else "FALSE",
         min_cells_gene  = config["preprocessing"]["min_cells_gene"],
         min_cells_larry = config["preprocessing"]["min_cells_larry"],
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
+        sample_paths    = get_sample_matrices()
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -22,6 +24,7 @@ rule create_seurat:
         "results/benchmarks/create_seurat/benchmark.txt"
     script:
         "../scripts/create_seurat.R"
+
 
 rule RNA_exploration:
     input:
@@ -36,15 +39,16 @@ rule RNA_exploration:
     conda:
          "../envs/Seurat.yaml"
     threads:
-        RESOURCES["create_seurat"]["cpu"]
+        RESOURCES["RNA_exploration"]["cpu"]
     resources:
-        mem_mb = RESOURCES["create_seurat"]["MaxMem"]
+        mem_mb = RESOURCES["RNA_exploration"]["MaxMem"]
     log:
         "results/00_logs/RNA_exploration/log"
     benchmark:
         "results/benchmarks/RNA_exploration/benchmark.txt"
     script:
         "../scripts/RNA_exploration.Rmd"
+
 
 rule barcode_exploration:
     input:
@@ -56,9 +60,9 @@ rule barcode_exploration:
     conda:
          "../envs/Seurat.yaml"
     threads:
-        RESOURCES["create_seurat"]["cpu"]
+        RESOURCES["barcode_exploration"]["cpu"]
     resources:
-        mem_mb = RESOURCES["create_seurat"]["MaxMem"]
+        mem_mb = RESOURCES["barcode_exploration"]["MaxMem"]
     log:
         "results/00_logs/qc/log"
     benchmark:

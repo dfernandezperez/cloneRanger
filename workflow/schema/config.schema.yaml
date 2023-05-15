@@ -45,7 +45,7 @@ properties:
     type: object
     properties:
       introns: { type: boolean }
-      n_cells: { type: integer }
+      n_cells: { oneOf: [ { type: integer },  { type: string, enum: ["auto"] } ] }
       mem    : { type: integer }
 
   feature_bc_config:

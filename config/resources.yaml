@@ -15,3 +15,11 @@ extract_barcodes:
 create_seurat:
     cpu   : 5
     MaxMem: 100000
+
+RNA_exploration:
+    cpu   : 1
+    MaxMem: 100000
+
+barcode_exploration:
+    cpu   : 1
+    MaxMem: 100000

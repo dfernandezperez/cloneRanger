@@ -58,12 +58,14 @@ seurat <- readRDS(input_file)
 
 # Introduction
 
-In this document you will find some exploratory plots regarding the distribution of larry barcodes in this single-cell experiment.
+In this document you will find some exploratory plots regarding the distribution
+of larry barcodes in this single-cell experiment.
 
 
 # Barcode summary table {.tabset}
 
-Summary metrics of the barcodes across the experiment based on different count thresholds:
+Summary metrics of the barcodes across the experiment based on different count
+thresholds:
 
 ```{r split-larry-matrices-set-thresholds}
 bc_df <- get_bc_df(split_matrices_barcodes(seurat, barcode_names))
@@ -141,7 +143,8 @@ in_tabs(bc_plot_l, level = 1L)
 
 # Summary barcodes per cell {.tabset}
 
-Representation of the number of barcodes detected per cell based on different thresholds.
+Representation of the number of barcodes detected per cell based on different
+thresholds.
 
 ```{r summary-bcs-per-cell, results = 'asis', fig.width=7.5, fig.height=7}
 bc_cell_distribution_plots <- function(bc_df_l, threshold) {
@@ -191,7 +194,8 @@ in_tabs(bc_cell_plot_l, level = 1L)
 
 # Summary barcode sizes {.tabset}
 
-Here you can find plots regarding the barcode sizes, which corresponds to the number of cells that contain a particular barcode.
+Here you can find plots regarding the barcode sizes, which corresponds to the
+number of cells that contain a particular barcode.
 
 ```{r summary, results = 'asis', fig.width=7.5, fig.height=7}
 bc_size_distribution_plots <- function(bc_df_l, threshold) {

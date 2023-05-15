@@ -10,7 +10,7 @@ wildcard_constraints:
     read_fb="R[12]",
     read_cb="R[12]",
     # lib type can be just ATAC, GEX or FB
-    lib_type='|'.join([x for x in ["ATAC", "GEX", "FB"]])
+    lib_type='|'.join([x for x in ["ATAC", "GEX", "FB", "CH"]])
 
 
 # Input functions
@@ -18,9 +18,11 @@ def get_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
     return units.loc[(wildcards.sample, wildcards.lib_type, wildcards.lane), ["R1", "R2"]].dropna()
 
+
 def get_atac_fastqs(wildcards):
     """Return all FASTQS specified in sample metadata."""
     return units.loc[(wildcards.sample, wildcards.lib_type, wildcards.lane), ["R3"]].dropna()
+
 
 def convert_introns():
     """Specify whether introns should be counted
@@ -44,6 +46,16 @@ def convert_introns():
         sys.exit("Intronic use can be only specified if 10x_pipeline == GEX or GEX_ATAC")
 
 
+def get_expected_cells():
+    """Function to set the number of expected cells if it was set by the user,
+    otherwise estimate them automatically by cellranger.
+    """
+    if config["cellranger_count"]["n_cells"] == "auto":
+        return ""
+    else:
+        return f'--expect-cells {config["cellranger_count"]["n_cells"]}'
+
+
 def is_feature_bc():
     """Specify whether feature barcoding has been performed
     or not
@@ -53,6 +65,19 @@ def is_feature_bc():
     else:
         return False
 
+
+def is_cell_hashing(sample):
+    """Specify if a sample has been processed with cell hashing (like totalseq)
+    and should be processed with the specific cellranger multi pipeline
+    """
+    if CELL_HASHING["assignments"] is None:
+        return False
+    elif sample in CELL_HASHING["assignments"]:
+        return True
+    else:
+        return False
+
+
 def get_library_type(wildcards):
     """Create the content of library.csv for the feature barcoding and multiome pipeline
     from cellranger.
@@ -60,47 +85,83 @@ def get_library_type(wildcards):
     Based on what is written in the column lib_type from the units file,
     write the following: "fastq folder,fastq name,library type".
     """
-    abs_path            = os.getcwd()
-    feature_barcode_col = set( units.loc[(wildcards.sample), "lib_type"] )
-    lib_types           = dict()
+    abs_path     = os.getcwd()
+    lib_type_col = set( units.loc[(wildcards.sample), "lib_type"] )
+    lib_types    = dict()
 
-    for fb in feature_barcode_col:
-        if fb == 'GEX':
-            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Gene Expression'
-        if fb == 'FB':
-            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Custom'
-        if fb == 'ATAC':
-            lib_types[fb] = f'{abs_path}/data/clean,{wildcards.sample}_{fb},Chromatin Accessibility'
+    for lib_type in lib_type_col:
+        if lib_type == 'GEX':
+            lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Gene Expression'
+        elif lib_type == 'ATAC':
+            lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Chromatin Accessibility'
+        # Use and if statement for larry and cellhashing data, in case we want to analzye the libs
+        # without some of them despite having the larry/ch fastq files in units.tsv.  
+        elif lib_type == 'FB':
+            if not is_feature_bc():
+                next
+            else:
+                lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Custom'
+        elif lib_type == 'CH':
+            if not is_cell_hashing(wildcards.sample):
+                next
+            else:
+                lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Multiplexing Capture'
+        else:
+            sys.exit("Library type must be GEX, FB, ATAC or CH.")
 
-    fb_names = [lib_types.get(fb) for fb in feature_barcode_col]
-    return '\n'.join(fb_names)
-
-
-def agg_fastqc():
-    """Aggregate input from FASTQC for MultiQC.
-
-    A simple snakemake expand is not used to avoid the cross product,
-    as not all samples will be in all lanes.
-
-    A checkpoint could be used. However, wildcard constraints and the sample sheet
-    guarantee we can know this a priori.
-    """
-    fastq_out = []
-    for lane, samples in metadata.items():
-        for sample in samples.keys():
-            fastq_out = fastq_out + [
-                f"results/fastqc/{lane}_{sample}_{read}_fastqc.zip"
-                for read in ["R1", "R2"]
-            ]
-    return dict(
-        fastqc=fastq_out,
-    )
+    return '\n'.join(lib_types.values())
 
 
-def get_qc_data(wildcards):
-    """Get all QC'd data, grouped by lane, for SOLO."""
-    keys_only = {k: list(v.keys()) for k, v in metadata.items()}
-    keys_only = {
-        k: [f"results/qc/{val}/adata.h5ad" for val in v] for k, v in keys_only.items()
-    }
-    return dict(data=keys_only[wildcards.lane])
+def get_library_input(wildcards):
+    if is_feature_bc() and is_cell_hashing(wildcards.sample):
+        return {
+            "fq"      : expand(
+                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                                sample   = wildcards.sample,
+                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                                read     = ["R1", "R2"]
+                            ),
+            "larry"   : "data/feature_reference/Feature_reference.csv",
+            "cmo_set" : "data/feature_bc_libraries/cmo-set.csv"
+        }
+    elif is_feature_bc() and not is_cell_hashing(wildcards.sample):
+        return {
+            "fq"      : expand(
+                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                                sample   = wildcards.sample,
+                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                                read     = ["R1", "R2"]
+                            ),
+            "larry"   : "data/feature_reference/Feature_reference.csv"
+        }
+    elif not is_feature_bc() and not is_cell_hashing(wildcards.sample):
+        return {
+            "fq"      : expand(
+                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                                sample   = wildcards.sample,
+                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                                read     = ["R1", "R2"]
+                            ),
+        }
+    elif not is_feature_bc() and is_cell_hashing(wildcards.sample):
+        return {
+            "fq"      : expand(
+                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                                sample   = wildcards.sample,
+                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                                read     = ["R1", "R2"]
+                            ),
+            "cmo_set" : "data/feature_bc_libraries/cmo-set.csv"
+        }
+
+
+def get_sample_matrices():
+
+    sample_paths = expand(
+                "results/01_counts/{sample}/outs/per_sample_outs/{subsample}/count/sample_filtered_feature_bc_matrix/",
+                zip,
+                sample    = SAMPLES_LONG,
+                subsample = SUBSAMPLES
+                )
+    
+    return(sample_paths)

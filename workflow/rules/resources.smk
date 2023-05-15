@@ -76,6 +76,21 @@ rule move_gex_fq:
         mv {input.rv} {output.rv}
         """
 
+rule move_cellhash_fq:
+    # Dummy rule to move the gex fastq files to the "clean" folder, in which the collapsed feature barcoding
+    # fastq files will be stored.
+    input:
+        fw = "data/lane_merged/{sample}_CH_S1_L001_R1_001.fastq.gz",
+        rv = "data/lane_merged/{sample}_CH_S1_L001_R2_001.fastq.gz"
+    output:
+        fw = "data/clean/{sample}_CH_S1_L001_R1_001.fastq.gz",
+        rv = "data/clean/{sample}_CH_S1_L001_R2_001.fastq.gz"
+    shell:
+        """
+        mv {input.fw} {output.fw}
+        mv {input.rv} {output.rv}
+        """
+
 rule move_atac_fq:
     # Dummy rule to move the atac fastq files to the "clean" folder, in which the collapsed feature barcoding
     # fastq files will be stored.
@@ -100,9 +115,36 @@ rule create_library:
     output:
         "data/feature_bc_libraries/{sample}_library.csv"
     params:
-        feature_barcoding = get_library_type
+        library_types = get_library_type
     shell:
         """
         echo "fastqs,sample,library_type" > {output}
-        echo "{params.feature_barcoding}" >> {output}
+        echo "{params.library_types}" >> {output}
         """
+
+rule create_cmo_set:
+    output:
+        "data/feature_bc_libraries/cmo-set.csv"
+    params:
+        cell_hashing = CELL_HASHING["barcodes"],
+    script:
+        "../scripts/create_cmo_set.py"
+
+
+rule create_library_multi:
+    input:
+        unpack(get_library_input)
+    output:
+        "data/feature_bc_libraries/{sample}_library_multi.csv"
+    params:
+        library_types     = get_library_type,
+        cell_hashing      = CELL_HASHING["assignments"],
+        cellranger_params = config["cellranger_count"]["extra_parameters_rna"],
+        introns           = convert_introns(),
+        n_cells           = get_expected_cells(),
+        genome            = config["genome_reference_gex"],
+        mem_gb            = config["cellranger_count"]["mem"],
+    log:
+        "results/00_logs/create_library_multi/{sample}.log"
+    script:
+        "../scripts/create_multi_library.py"

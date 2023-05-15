@@ -1,0 +1,30 @@
+# Sequence and pattern of totalseq or a different method used for cell hashing.
+# https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/multi#samples
+# The information required is the sequence of the barcode, the sample to which it corresponds and barcode location in read
+# Example --> cellhash-name : ["Sample1", "R2", "5P(BC)"", "ACCCACCAGTAAGAC"]
+# If there is not cellhashing data in the libraries the "barcode" field can be filled, the only that has to be empty is the
+# assignments. Example:
+#  TotalSeqMouse1: ["R2", "5PNNNNNNNNNN(BC)", "ACCCACCAGTAAGAC"]
+
+barcodes:
+  TotalSeqMouse1: ["R2", "5PNNNNNNNNNN(BC)", "ACCCACCAGTAAGAC"]
+  TotalSeqMouse2: ["R2", "5PNNNNNNNNNN(BC)", "GGTCGAGAGCATTCA"]
+  TotalSeqMouse3: ["R2", "5PNNNNNNNNNN(BC)", "CTTGCCGCATGTCAT"]
+  TotalSeqMouse4: ["R2", "5PNNNNNNNNNN(BC)", "AAAGCATTCTTCACG"]
+
+# Here you have to write the cellhashing Ab ID that corresponds to every sample.
+# The Ab ID are those defined previosly in "barcodes". The structure has to be the following:
+# sample_id (from units.tsv):
+#   Ab-Id: subsample_id (the one you like)
+# "subsample_id" will be used as the new sample name, which will appear in the seurat object.
+# Example:
+  # No-MS5-HSC:
+  #   TotalSeqMouse1: "No-MS5-HSC-rep1"
+  #   TotalSeqMouse3: "No-MS5-HSC-rep2"
+assignments:
+  # No-MS5-HSC:
+  #   TotalSeqMouse1: "No-MS5-HSC-rep1"
+  #   TotalSeqMouse3: "No-MS5-HSC-rep2"
+  # MS5-HSC:
+  #   TotalSeqMouse3: "MS5-HSC-rep1"
+  #   TotalSeqMouse4: "MS5-HSC-rep2"

@@ -5,23 +5,51 @@ from snakemake.utils import validate
 configfile: "config/config.yaml"
 container : "docker://condaforge/mambaforge:4.10.3-6"
 
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file and validate structures
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Load units
-units       = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample_id", "lib_type", "lane"], drop=False).sort_index()
+units       = pd.read_csv(config["units"], dtype = str, sep = "\t").set_index(["sample_id", "lib_type", "lane"], drop = False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
-# # Validate structures
-validate(units, schema="schema/units.schema.yaml")
-validate(config, schema="schema/config.schema.yaml")
-
-
-SAMPLES      = set(units["sample_id"])
+# Resources and cell hashing information yaml files
 RESOURCES    = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
+CELL_HASHING = yaml.load(open(config['cell_hashing'], 'r'), Loader=yaml.FullLoader)
+
+# Validate structures
+validate(units, schema = "schema/units.schema.yaml")
+validate(config, schema = "schema/config.schema.yaml")
+validate(CELL_HASHING, schema = "schema/cell_hashing.schema.yaml")
+
+# Store sample names, larry colors and lib tyes in variables.
+SAMPLES      = set(units["sample_id"])
 LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
 LIB_TYPES    = set(units["lib_type"])
+
+# Create two lists containing: one containing the "subsample" names, which are the sample names defined in sample_id
+# in the units.tsv file, except for those samples in which cellhashing has been performed, where the sample_id is changed
+# by the keys of the dict from cell_hashing["assignments"]. The other list is a list of the same length as the 1st, but 
+# instead of naming the subsamples, if a sample has 3 sub-samples, the sample_id will be repeat 3 times.
+# Exmaple: ["subA-1", "subA-2", "B"] and ["A", "A", "B"].
+# This is used to define the inputs of seurat.
+if CELL_HASHING["assignments"] is None:
+    cellhahsing_dict = dict()
+else:
+    cellhahsing_dict = {k: list(v.values()) for k, v in CELL_HASHING["assignments"].items()}
+
+SAMPLES_LONG = list()
+SUBSAMPLES   = list()
+
+for sample in SAMPLES:
+    if sample in cellhahsing_dict:
+        for subsample in cellhahsing_dict[sample]:
+            SAMPLES_LONG.append(sample)
+            SUBSAMPLES.append(subsample)
+    else:
+        SAMPLES_LONG.append(sample)
+        SUBSAMPLES.append(sample)
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -33,14 +61,30 @@ include: "rules/counts.smk"
 include: "rules/larry_processing.smk"
 include: "rules/preprocessing.smk"
 
+# Create a small dictionary with the library types corresponding to each sample. This is done in this way to be able to 
+# execute the pipeline without larry (fb) or cellhashing also when those fastq files are present in the units.tsv file.
+SAMPLE_LIB_DICT = {key: [] for key in SAMPLES}
+for sample,lib_type in zip(units["sample_id"].values, units["lib_type"].values):
+    if not is_feature_bc() and lib_type == "FB":
+        next
+    elif not is_cell_hashing(sample) and lib_type == "CH":
+        next
+    else:
+        SAMPLE_LIB_DICT[sample].append(lib_type)
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Rule all
+#-----------------------------------------------------------------------------------------------------------------------
 # Define target files based on pipeline
 if config["10x_pipeline"] == "GEX" and is_feature_bc():
     target_files = [
         "results/03_RNA-exploration/RNA_exploration.html",
         "results/04_barcode-exploration/barcode_exploration.html"
         ]
-if config["10x_pipeline"] == "GEX" and not is_feature_bc():
+
+elif config["10x_pipeline"] == "GEX" and not is_feature_bc():
     target_files = "results/03_RNA-exploration/RNA_exploration.html"
+    
 elif config["10x_pipeline"] in ["ARC", "ATAC"]:
     target_files = expand("results/01_counts/{sample}/outs/filtered_feature_bc_matrix.h5", sample = SAMPLES)
 

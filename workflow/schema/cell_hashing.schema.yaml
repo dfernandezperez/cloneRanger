@@ -1,0 +1,16 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: Cell hashing configuration file
+
+type: object
+
+properties:
+  # barcodes:
+  #   type: object
+    
+  # assignments:
+  #   type: object
+
+  config:
+    description: Sample species
+    type       : array
