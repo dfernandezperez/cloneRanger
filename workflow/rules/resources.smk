@@ -40,6 +40,8 @@ rule merge_lanes:
         rv = "data/lane_merged/{sample}_{lib_type}_S1_L001_R2_001.fastq.gz"
     log:
         "results/00_logs/merge_lanes/{sample}_{lib_type}.log"
+    container:
+        None
     shell:
         """
         cat {input.fw} > {output.fw} 2> {log}
@@ -56,6 +58,8 @@ rule merge_lanes_atac:
         "data/lane_merged/{sample}_{lib_type}_S1_L001_R3_001.fastq.gz"
     log:
         "results/00_logs/merge_lanes_atac/{sample}_{lib_type}.log"
+    container:
+        None
     shell:
         """
         cat {input} > {output} 2> {log}
@@ -70,6 +74,8 @@ rule move_gex_fq:
     output:
         fw = "data/clean/{sample}_GEX_S1_L001_R1_001.fastq.gz",
         rv = "data/clean/{sample}_GEX_S1_L001_R2_001.fastq.gz"
+    container:
+        None
     shell:
         """
         mv {input.fw} {output.fw}
@@ -85,6 +91,8 @@ rule move_cellhash_fq:
     output:
         fw = "data/clean/{sample}_CH_S1_L001_R1_001.fastq.gz",
         rv = "data/clean/{sample}_CH_S1_L001_R2_001.fastq.gz"
+    container:
+        None
     shell:
         """
         mv {input.fw} {output.fw}
@@ -102,6 +110,8 @@ rule move_atac_fq:
         fw = "data/clean/{sample}_ATAC_S1_L001_R1_001.fastq.gz",
         rv = "data/clean/{sample}_ATAC_S1_L001_R2_001.fastq.gz",
         r3 = "data/clean/{sample}_ATAC_S1_L001_R3_001.fastq.gz"
+    container:
+        None
     shell:
         """
         mv {input.fw} {output.fw}
