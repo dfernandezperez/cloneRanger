@@ -138,7 +138,7 @@ rule create_cmo_set:
     params:
         cell_hashing = CELL_HASHING["barcodes"],
     script:
-        "../scripts/create_cmo_set.py"
+        "../scripts/python/create_cmo_set.py"
 
 
 rule create_library_multi:
@@ -157,4 +157,4 @@ rule create_library_multi:
     log:
         "results/00_logs/create_library_multi/{sample}.log"
     script:
-        "../scripts/create_multi_library.py"
+        "../scripts/python/create_multi_library.py"

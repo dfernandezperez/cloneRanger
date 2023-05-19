@@ -97,4 +97,4 @@ rule generate_feature_ref:
     conda:
         "../envs/Seurat.yaml"
     script:
-        "../scripts/python/generate_feature_ref.R"
+        "../scripts/R/generate_feature_ref.R"
