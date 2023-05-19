@@ -1,17 +1,17 @@
 rule create_seurat:
     input:
-        expand("results/01_counts/{sample}/outs/per_sample_outs/", sample = SAMPLES)
+        cellranger_mtx = get_cellranger_mtx
     output:
-        no_doublets = "results/02_createSeurat/seurat_noDoublets.rds",
-        raw         = "results/02_createSeurat/seurat_allCells.rds"
+        seurat = "results/02_createSeurat/seurat_{sample}.rds",
     params:
-        sample_names    = SUBSAMPLES,
+        subsample_names = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "",
+        cell_assign     = lambda w: "results/01_counts/{sample}/outs/multi/multiplexing_analysis/assignment_confidence_table.csv".format(sample = w.sample) if is_cell_hashing(w.sample) else "",
+        is_cell_hashing = lambda w: "TRUE" if is_cell_hashing(w.sample) else "FALSE",
         is_larry        = "TRUE" if is_feature_bc() else "FALSE",
         min_cells_gene  = config["preprocessing"]["min_cells_gene"],
         min_cells_larry = config["preprocessing"]["min_cells_larry"],
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
-        sample_paths    = get_sample_matrices()
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -19,23 +19,43 @@ rule create_seurat:
     resources:
         mem_mb = RESOURCES["create_seurat"]["MaxMem"]
     log:
-        "results/00_logs/create_seurat/log"
+        "results/00_logs/create_seurat/{sample}.log"
     benchmark:
-        "results/benchmarks/create_seurat/benchmark.txt"
+        "results/benchmarks/create_seurat/{sample}_benchmark.txt"
     script:
-        "../scripts/create_seurat.R"
+        "../scripts/R/create_seurat.R"
+
+
+rule merge_seurat:
+    input:
+        expand("results/02_createSeurat/seurat_{sample}.rds", sample = SAMPLES)
+    output:
+        no_doublets = "results/03_mergeSeurat/seurat_noDoublets.rds",
+        raw         = "results/03_mergeSeurat/seurat_raw.rds"
+    conda:
+         "../envs/Seurat.yaml"
+    threads:
+        RESOURCES["merge_seurat"]["cpu"]
+    resources:
+        mem_mb = RESOURCES["merge_seurat"]["MaxMem"]
+    log:
+        "results/00_logs/merge_seurat/log"
+    benchmark:
+        "results/benchmarks/merge_seurat/benchmark.txt"
+    script:
+        "../scripts/R/merge_seurat.R"      
 
 
 rule RNA_exploration:
     input:
-        "results/02_createSeurat/seurat_noDoublets.rds"
+        "results/03_mergeSeurat/seurat_noDoublets.rds"
     output:
-        html = "results/03_RNA-exploration/RNA_exploration.html"
+        html = "results/04_RNA-exploration/RNA_exploration.html"
     params:
         marker_genes  = config["preprocessing"]["marker_genes"],
         species       = config["species"],
-        cluster_degs  = "results/03_RNA-exploration/cluster_degs.tsv",
-        sample_degs   = "results/03_RNA-exploration/sample_degs.tsv"
+        cluster_degs  = "results/04_RNA-exploration/cluster_degs.tsv",
+        sample_degs   = "results/04_RNA-exploration/sample_degs.tsv"
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -47,14 +67,14 @@ rule RNA_exploration:
     benchmark:
         "results/benchmarks/RNA_exploration/benchmark.txt"
     script:
-        "../scripts/RNA_exploration.Rmd"
+        "../scripts/R/RNA_exploration.Rmd"
 
 
 rule barcode_exploration:
     input:
-        "results/02_createSeurat/seurat_noDoublets.rds"
+        "results/03_mergeSeurat/seurat_noDoublets.rds"
     output:
-        html = "results/04_barcode-exploration/barcode_exploration.html"
+        html = "results/05_barcode-exploration/barcode_exploration.html"
     params:
         barcodes = LARRY_COLORS
     conda:
@@ -64,8 +84,8 @@ rule barcode_exploration:
     resources:
         mem_mb = RESOURCES["barcode_exploration"]["MaxMem"]
     log:
-        "results/00_logs/qc/log"
+        "results/00_logs/barcode_exploration/log"
     benchmark:
-        "results/benchmarks/qc/benchmark.txt"
+        "results/benchmarks/barcode_exploration/benchmark.txt"
     script:
-        "../scripts/barcode_exploration.Rmd"
+        "../scripts/R/barcode_exploration.Rmd"

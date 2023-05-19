@@ -22,7 +22,7 @@ rule extract_barcodes:
     resources:
         mem_mb = RESOURCES["extract_barcodes"]["MaxMem"]
     script:
-        "../scripts/extract_barcodes.py"
+        "../scripts/python/extract_barcodes.py"
 
 
 rule collapse_fastq_hd:
@@ -59,7 +59,7 @@ rule correct_barcodes:
     conda:
          "../envs/python.yaml"
     script:
-        "../scripts/correct_barcodes.py"
+        "../scripts/python/correct_barcodes.py"
 
 
 rule merge_corrected_fastq:
@@ -97,4 +97,4 @@ rule generate_feature_ref:
     conda:
         "../envs/Seurat.yaml"
     script:
-        "../scripts/generate_feature_ref.R"
+        "../scripts/python/generate_feature_ref.R"

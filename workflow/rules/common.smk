@@ -155,13 +155,8 @@ def get_library_input(wildcards):
         }
 
 
-def get_sample_matrices():
-
-    sample_paths = expand(
-                "results/01_counts/{sample}/outs/per_sample_outs/{subsample}/count/sample_filtered_feature_bc_matrix/",
-                zip,
-                sample    = SAMPLES_LONG,
-                subsample = SUBSAMPLES
-                )
-    
-    return(sample_paths)
+def get_cellranger_mtx(wildcards):
+    if is_cell_hashing(wildcards.sample):
+        return "results/01_counts/{sample}/outs/multi/count/raw_feature_bc_matrix/"
+    else:
+        return "results/01_counts/{sample}/outs/per_sample_outs/{sample}/count/sample_filtered_feature_bc_matrix/"

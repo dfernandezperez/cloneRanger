@@ -13,8 +13,8 @@ extract_barcodes:
     MaxMem: 16000
 
 create_seurat:
-    cpu   : 5
-    MaxMem: 100000
+    cpu   : 1
+    MaxMem: 16000
 
 RNA_exploration:
     cpu   : 1
@@ -22,4 +22,8 @@ RNA_exploration:
 
 barcode_exploration:
     cpu   : 1
+    MaxMem: 50000
+
+merge_seurat:
+    cpu : 10
     MaxMem: 100000

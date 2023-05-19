@@ -11,7 +11,8 @@ if config["10x_pipeline"] == "GEX":
                             ),
             multi_ref = "data/feature_bc_libraries/{sample}_library_multi.csv"
         output:
-            directory("results/01_counts/{sample}/outs/per_sample_outs/"),
+            filt_mtx = directory("results/01_counts/{sample}/outs/per_sample_outs/"),
+            raw_mtx  = directory("results/01_counts/{sample}/outs/multi/count/raw_feature_bc_matrix/")
         params:
             mem_gb = config["cellranger_count"]["mem"]
         log:

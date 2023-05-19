@@ -38,7 +38,7 @@ sink(log, type = "message")
 library(Seurat)
 library(tidyverse)
 library(viridis)
-source("workflow/scripts/functions.R")
+source("workflow/scripts/R/functions.R")
 ```
 
 ```{r input-files-and-params}
@@ -87,13 +87,13 @@ Idents(seurat) <- seurat$seurat_clusters
 Mitochondrial RNA by sample:
 
 ```{r, fig.width = 7.5, fig.height = 4}
-VlnPlot(seurat, features = c("percent.mt"), pt.size = 0) + theme(legend.position = "none")
+VlnPlot(seurat, features = c("percent.mt"), pt.size = 0, group.by = "sample") + theme(legend.position = "none")
 ```
 
 Ribosomal RNA by sample:
 
 ```{r, fig.width = 7.5, fig.height = 4}
-VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0) + theme(legend.position = "none")
+VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0, group.by = "sample") + theme(legend.position = "none")
 ```
 
 
@@ -115,13 +115,13 @@ VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0, group.by = "seurat_cl
 # UMAP plots {.tabset .tabset-fade}
 
 ```{r umap-plots, results='asis', fig.width=7, fig.height=5.5}
-seurat_sample_plt  <- DimPlot(seurat, group.by = "sample")
-seurat_cluster_plt <- DimPlot(seurat, group.by = "seurat_clusters")
-seurat_cc_plt      <- DimPlot(seurat, group.by = "Phase")
-seurat_RNA_plt     <- FeaturePlot(seurat, features = "nFeature_RNA", max.cutoff = "q99") + scale_color_viridis()
-seurat_Count_plt   <- FeaturePlot(seurat, features = "nCount_RNA", max.cutoff = "q99") + scale_color_viridis()
-seurat_mt_plt      <- FeaturePlot(seurat, features = "percent.mt", max.cutoff = "q99") + scale_color_viridis()
-seurat_ribo_plt    <- FeaturePlot(seurat, features = "percent.ribo", max.cutoff = "q99") + scale_color_viridis()
+seurat_sample_plt  <- DimPlot(seurat, group.by = "sample", raster=FALSE)
+seurat_cluster_plt <- DimPlot(seurat, group.by = "seurat_clusters", raster=FALSE)
+seurat_cc_plt      <- DimPlot(seurat, group.by = "Phase", raster=FALSE)
+seurat_RNA_plt     <- FeaturePlot(seurat, features = "nFeature_RNA", max.cutoff = "q99", raster=FALSE) + scale_color_viridis()
+seurat_Count_plt   <- FeaturePlot(seurat, features = "nCount_RNA", max.cutoff = "q99", raster=FALSE) + scale_color_viridis()
+seurat_mt_plt      <- FeaturePlot(seurat, features = "percent.mt", max.cutoff = "q99", raster=FALSE) + scale_color_viridis()
+seurat_ribo_plt    <- FeaturePlot(seurat, features = "percent.ribo", max.cutoff = "q99", raster=FALSE) + scale_color_viridis()
 
 l <- list(
   UMAP_sample    = seurat_sample_plt,
@@ -165,7 +165,7 @@ top_9_markers <- cluster_markers %>%
 
 plots <- map(
   top_9_markers,
-  \(genes) FeaturePlot(seurat, features = genes, ncol = 3) & scale_color_viridis()
+  \(genes) FeaturePlot(seurat, features = genes, ncol = 3, raster=FALSE) & scale_color_viridis()
 )
 
 in_tabs(plots, level = 1L)
@@ -188,7 +188,7 @@ top_9_markers <- sample_markers %>%
 
 plots <- map(
   top_9_markers,
-  \(genes) FeaturePlot(seurat, features = genes, ncol = 3) & scale_color_viridis()
+  \(genes) FeaturePlot(seurat, features = genes, ncol = 3, raster=FALSE) & scale_color_viridis()
 )
 
 in_tabs(plots, level = 1L)

@@ -28,29 +28,6 @@ SAMPLES      = set(units["sample_id"])
 LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
 LIB_TYPES    = set(units["lib_type"])
 
-# Create two lists containing: one containing the "subsample" names, which are the sample names defined in sample_id
-# in the units.tsv file, except for those samples in which cellhashing has been performed, where the sample_id is changed
-# by the keys of the dict from cell_hashing["assignments"]. The other list is a list of the same length as the 1st, but 
-# instead of naming the subsamples, if a sample has 3 sub-samples, the sample_id will be repeat 3 times.
-# Exmaple: ["subA-1", "subA-2", "B"] and ["A", "A", "B"].
-# This is used to define the inputs of seurat.
-if CELL_HASHING["assignments"] is None:
-    cellhahsing_dict = dict()
-else:
-    cellhahsing_dict = {k: list(v.values()) for k, v in CELL_HASHING["assignments"].items()}
-
-SAMPLES_LONG = list()
-SUBSAMPLES   = list()
-
-for sample in SAMPLES:
-    if sample in cellhahsing_dict:
-        for subsample in cellhahsing_dict[sample]:
-            SAMPLES_LONG.append(sample)
-            SUBSAMPLES.append(subsample)
-    else:
-        SAMPLES_LONG.append(sample)
-        SUBSAMPLES.append(sample)
-
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Rules

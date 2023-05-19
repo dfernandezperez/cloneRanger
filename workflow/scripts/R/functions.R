@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------------------------------------------------------
 in_tabs <- function(l, labels = names(l), level, knit = TRUE, close_tabset = FALSE) {
   require(stringi)
-	id <- stri_rand_strings(1,15) # generate random id for chunk
+  id <- stri_rand_strings(1, 15) # generate random id for chunk
   ## https://stackoverflow.com/questions/69353667/dynamic-creation-of-tabs-in-rmarkdown-does-not-work-for-ggplot-while-it-does-for
   if (is.null(labels)) {
     stop("labels are NULL, it is required not to be so that the tabs have proper names")
@@ -11,7 +11,7 @@ in_tabs <- function(l, labels = names(l), level, knit = TRUE, close_tabset = FAL
   names(l) <- labels
 
   rmd_code <- lapply(seq_along(l), FUN = function(i) obj_to_rmd(l[[i]], name = names(l)[i], level = level + 1L, id = paste(id, i, sep = "-")))
-  
+
   if (isTRUE(getOption("knitr.in.progress"))) {
     res <- knitr::knit(text = unlist(rmd_code), quiet = TRUE)
     cat(res)
@@ -61,7 +61,7 @@ obj_to_rmd <- function(obj, parent_name = "l", name, level, id) {
 #-----------------------------------------------------------------------------------------------------------------------
 plot_detected_genes <- function(seurat, detected_genes, gene) {
   if (gene %in% detected_genes) {
-    p <- FeaturePlot(seurat, features = gene, max.cutoff = "q99") + scale_color_viridis()
+    p <- FeaturePlot(seurat, features = gene, max.cutoff = "q99", raster = FALSE) + scale_color_viridis()
   } else {
     p <- "Not detected."
   }

@@ -41,8 +41,8 @@ library(BiocParallel)
 library(stringr)
 library(glue)
 library(tidyverse)
-source("workflow/scripts/functions.R")
-source("workflow/scripts/barcode_qc/clone_calling_functions.R")
+source("workflow/scripts/R/functions.R")
+source("workflow/scripts/R/clone_calling_functions.R")
 ```
 
 ```{r input-files-and-params}
