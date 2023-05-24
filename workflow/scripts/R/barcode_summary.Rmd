@@ -1,0 +1,239 @@
+---
+title: "Barcode calling summary"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    fig_caption: yes
+    df_print: paged
+    highlight: tango
+    number_sections: no
+    theme: flatly
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r knitr, include = FALSE}
+knitr::opts_chunk$set(
+    echo           = TRUE,
+    error          = FALSE,
+    fig.align      = "center",
+    message        = FALSE,
+    warning        = FALSE,
+    fig.width      = 10,
+    fig.height     = 8
+)
+```
+
+```{r logs}
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log)
+sink(log, type = "message")
+```
+
+```{r libraries}
+library(Seurat)
+library(tidyverse)
+library(DropletUtils)
+source("workflow/scripts/R/functions.R")
+```
+
+```{r define-functions}
+get_larry_molinfo <- function(molinfo) {
+  
+  larry_bc_pos <- which(molinfo$feature.type == "Custom")
+
+  larry_molinfo <- molinfo$data %>% 
+    data.frame() %>% 
+    dplyr::filter(gene %in% larry_bc_pos) %>% 
+    mutate(larry_bc = molinfo$genes[gene]) %>% # Create col with larry bc name instead of idx from molinfo$genes
+    mutate(larry_color = str_replace(larry_bc, "_.*$", "")) %>% # Add color information to split barcodes
+    dplyr::select(-gene)
+  
+    return(larry_molinfo)
+  
+}
+
+
+filter_umi_reads <- function(df_molinfo, read_threshold) {
+  
+  df_molinfo <- df_molinfo %>% 
+    dplyr::filter(reads >= read_threshold)
+    
+  return(df_molinfo)
+  
+}
+
+
+filter_bc_umis <- function(df_molinfo, umi_threshold) {
+  
+  df_molinfo <- df_molinfo %>% 
+    dplyr::group_by(cell, larry_bc, larry_color) %>% 
+    dplyr::count() %>% 
+    dplyr::rename(n_umi = n) %>% 
+    dplyr::filter(n_umi >= umi_threshold) %>% 
+    dplyr::ungroup()
+  
+  return(df_molinfo)
+  
+}
+
+
+efficiency_larry <- function(df_molinfo, umi_threshold, n_cells) {
+  
+  efficiency <- df_molinfo %>% 
+    filter_bc_umis(umi_threshold) %>% 
+    dplyr::group_by(larry_color) %>% 
+    dplyr::distinct(cell) %>% 
+    dplyr::count() %>% 
+    dplyr::mutate(efficiency    = n/n_cells,
+                  umi_threshold = umi_threshold
+                  ) %>% 
+    dplyr::ungroup()
+  
+  return(efficiency)
+  
+}
+
+
+plot_larry_efficiency <- function(molinfo_larry, read_threshold, n_cells, umi_thresholds) {
+  
+  larry_molinfo_read_filt <- molinfo_larry %>% 
+    filter_umi_reads(read_threshold)
+  
+  larry_eficiencies <- purrr::map_df(umi_thresholds,
+             \(umi_threshold) efficiency_larry(larry_molinfo_read_filt, umi_threshold, n_cells)
+             )
+  
+  p <- larry_eficiencies %>%
+    ggplot2::ggplot(aes( x = umi_threshold, y = efficiency)) +
+    geom_line() +
+    facet_wrap(~ larry_color) +
+    theme_bw() +
+    ggtitle(paste0(read_threshold, " read threshold"))
+
+  return(p)
+  
+}
+
+prop_integrations_larry <- function(df_molinfo, umi_threshold) {
+  
+  integrtions <- df_molinfo %>% 
+    filter_bc_umis(umi_threshold) %>% 
+    dplyr::group_by(larry_color) %>% 
+    dplyr::count(cell) %>% 
+    dplyr::summarise(
+      p_cells_multiple_integrations = sum(n > 1)/n()
+    ) %>% 
+    dplyr::mutate(umi_threshold = umi_threshold) %>% 
+    dplyr::ungroup()
+  
+  return(integrtions)
+  
+}
+
+plot_larry_mult_int <- function(molinfo_larry, read_threshold, umi_thresholds) {
+  
+  larry_molinfo_read_filt <- molinfo_larry %>% 
+    filter_umi_reads(read_threshold)
+  
+  larry_eficiencies <- purrr::map_df(umi_thresholds,
+             \(umi_threshold) prop_integrations_larry(larry_molinfo_read_filt, umi_threshold)
+             )
+  
+  p <- larry_eficiencies %>%
+    ggplot2::ggplot(aes( x = umi_threshold, y = p_cells_multiple_integrations)) +
+    geom_line() +
+    facet_wrap(~ larry_color) +
+    theme_bw() +
+    ggtitle(paste0(read_threshold, " read threshold")) +
+    scale_x_continuous(breaks = umi_thresholds)
+
+  return(p)
+  
+}
+```
+
+```{r prepare-data, results = 'hide'}
+seurat_rds    <- snakemake@input[[1]]
+molec_info_h5 <- snakemake@params[["molecule_info"]]
+  
+seurat      <- readRDS(seurat_rds)
+molinfo     <- read10xMolInfo(molec_info_h5,
+                              get.cell    = TRUE,
+                              get.umi     = TRUE,
+                              get.gem     = FALSE,
+                              get.gene    = TRUE,
+                              get.reads   = TRUE,
+                              get.library = FALSE
+                              )
+
+# Modify cell names form molinfo file to match those from seurat (basically add whatever is)
+# before and after the cellular barcode (which consists in random 16 nucleotides, by now)
+cell_prefix <- Cells(seurat) %>% str_replace("[AGTC]{16}-.*", "")
+cell_suffix <- Cells(seurat) %>% str_replace(".*_[AGTC]{16}", "")
+
+molinfo$data <- molinfo$data %>% 
+  data.frame() %>%
+  dplyr::mutate(cell = paste0(cell_prefix, cell, cell_suffix)) %>% 
+  filter(cell %in% Cells(seurat)) %>% 
+  DataFrame()
+
+molinfo_larry <- get_larry_molinfo(molinfo)
+```
+
+
+# Histogram of UMI reads
+
+Number of UMIs that have X amount of reads associated to them.
+
+```{r, fig.width= 7.5, fig.height=5}
+molinfo_larry %>% 
+  ggplot(aes(reads)) + 
+  geom_histogram(bins = 100) +
+  scale_y_log10() +
+  scale_x_log10() +
+  theme_bw() +
+  facet_wrap(~larry_color)
+```
+
+# Larry efficiency depending on read & UMI thresholds {.tabset .tabset-fade}
+
+Here you can find the larry efficiency (= the proportion of cells form sample in which at least 1 barcode is detected) based on different read and UMI thresholds. The read threshold determines the amount of reads required for an UMI to be considered as valid, meanwhile the UMI threshold is the number of UMIs that a barcode needs to have in order to consider it detected.
+
+```{r larry-efficiencies, fig.width=7.5, fig.height=5, results='asis'}
+summary_larry_thresholds <- map(1:10,
+    \(read_threshold) plot_larry_efficiency(
+                      molinfo_larry  = molinfo_larry,
+                      read_threshold = read_threshold,
+                      n_cells        = length(Cells(seurat)),
+                      umi_thresholds = 1:10
+                      )
+    )
+
+names(summary_larry_thresholds) <- paste0(1:10, " reads")
+
+in_tabs(summary_larry_thresholds, level = 1L)
+```
+
+
+# Multiple integrations dependingn on read & UMI thresholds {.tabset .tabset-fade}
+
+Here you can find, from the total of cells that contain a barcode, which proportion of them contain +1 one ("multiple integtations"). This is useful to see if the number of barcodes detected per cell is very sensitive or not to the read/UMI filtering, which can indicate the presence of barcodes coming from ambient RNA.
+
+```{r larry-integrations, fig.width=7.5, fig.height=5, results='asis'}
+summary_larry_integrations <- map(1:10,
+    \(read_threshold) plot_larry_mult_int(
+                      molinfo_larry  = molinfo_larry,
+                      read_threshold = read_threshold,
+                      umi_thresholds = 1:10
+                      )
+    )
+
+names(summary_larry_integrations) <- paste0(1:10, " reads")
+
+in_tabs(summary_larry_integrations, level = 1L)
+```

@@ -56,6 +56,7 @@ for sample,lib_type in zip(units["sample_id"].values, units["lib_type"].values):
 if config["10x_pipeline"] == "GEX" and is_feature_bc():
     target_files = [
         "results/04_RNA-exploration/RNA_exploration.html",
+        expand("results/05_barcode-exploration/{sample}_barcode_filtering.html", sample = SAMPLES),
         "results/05_barcode-exploration/barcode_exploration.html"
         ]
 

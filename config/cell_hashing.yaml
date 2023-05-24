@@ -25,6 +25,6 @@ assignments:
   No-MS5-HSC:
     TotalSeqMouse1: "No-MS5-HSC-rep1"
     TotalSeqMouse3: "No-MS5-HSC-rep2"
-  MS5-HSC:
-    TotalSeqMouse3: "MS5-HSC-rep1"
-    TotalSeqMouse4: "MS5-HSC-rep2"
+    #  MS5-HSC:
+    #    TotalSeqMouse3: "MS5-HSC-rep1"
+    #    TotalSeqMouse4: "MS5-HSC-rep2"

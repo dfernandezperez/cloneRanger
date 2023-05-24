@@ -6,6 +6,9 @@ sink(log, type = "message")
 ### Libraries
 library(Seurat)
 library(tidyverse)
+library(SingleCellExperiment)
+library(scDblFinder)
+library(BiocParallel)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Create seurat object
@@ -43,7 +46,7 @@ create_seurat_cellhashing <- function(input_files, cell_assign, sample_name, sub
         mutate(Barcode = paste(sample_name, Barcode, sep = "_")) %>%
         deframe()
 
-    seurat$sample <- subsample_names
+    seurat$sample  <- subsample_names
     Idents(seurat) <- seurat$sample
     # Add a column with the cellhashing sample name. Important for the next step in which doublets will be removed.
     seurat$cellhashing <- sample_name
@@ -67,9 +70,9 @@ create_seurat_single <- function(input_files, sample_name, min_cells_gene = 1, m
 
     # Fix sample names. cellhashing column is added to be consistent with the structure of seurat objects
     # coming from libraries in which cellhashing has been performed.
-    seurat$sample <- sample_name
+    seurat$sample      <- sample_name
     seurat$cellhashing <- sample_name
-    Idents(seurat) <- seurat$sample
+    Idents(seurat)     <- seurat$sample
 
     return(seurat)
 }
@@ -87,13 +90,30 @@ create_seurat <- function(input_files, cell_assign, sample_name, subsample_names
         )
     } else {
         seurat <- create_seurat_single(
-            snakemake@input[["cellranger_mtx"]],
+            snakemake@params[["sample_path"]],
             snakemake@wildcards[["sample"]],
             snakemake@params[["min_cells_gene"]],
             snakemake@params[["min_cells_larry"]],
             snakemake@params[["is_larry"]]
         )
     }
+
+    return(seurat)
+}
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Remove cell doublets
+#-----------------------------------------------------------------------------------------------------------------------
+remove_doublets <- function(seurat, cores = 1) {
+    sce <- NormalizeData(seurat) %>% as.SingleCellExperiment()
+    sce <- scDblFinder(sce, samples = "cellhashing", BPPARAM = MulticoreParam(cores))
+
+    dblt_info <- sce$scDblFinder.class
+    names(dblt_info) <- rownames(sce@colData)
+    seurat$scDblFinder.class <- dblt_info
+
+    print("Total number of singlets and doublets")
+    print(table(seurat$scDblFinder.class))
 
     return(seurat)
 }
@@ -113,10 +133,16 @@ seurat <- create_seurat(
     snakemake@params[["is_cell_hashing"]]
 )
 
+seurat <- remove_doublets(seurat, cores = snakemake@threads[[1]])
+
 # Add mitochondrial and ribosomal RNA metrics
-mito_pattern <- snakemake@params[["mito_pattern"]]
-ribo_pattern <- snakemake@params[["ribo_pattern"]]
-seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = mito_pattern)
+mito_pattern             <- snakemake@params[["mito_pattern"]]
+ribo_pattern             <- snakemake@params[["ribo_pattern"]]
+seurat[["percent.mt"]]   <- PercentageFeatureSet(seurat, pattern = mito_pattern)
 seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = ribo_pattern)
 
-saveRDS(seurat, snakemake@output[["seurat"]])
+# Filter doublets and save object
+seurat_clean <- subset(seurat, subset = scDblFinder.class == "singlet")
+
+saveRDS(seurat_clean, snakemake@output[["no_doublets"]])
+saveRDS(seurat, snakemake@output[["raw"]])

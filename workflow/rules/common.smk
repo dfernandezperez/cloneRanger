@@ -159,4 +159,11 @@ def get_cellranger_mtx(wildcards):
     if is_cell_hashing(wildcards.sample):
         return "results/01_counts/{sample}/outs/multi/count/raw_feature_bc_matrix/"
     else:
-        return "results/01_counts/{sample}/outs/per_sample_outs/{sample}/count/sample_filtered_feature_bc_matrix/"
+        return "results/01_counts/{sample}/outs/per_sample_outs/"
+
+
+def get_seurat_rds(wildcards):
+    if is_feature_bc():
+        return expand("results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds", sample = SAMPLES)
+    else:
+        return expand("results/02_createSeurat/seurat_{sample}_noDoublets.rds", sample = SAMPLES)

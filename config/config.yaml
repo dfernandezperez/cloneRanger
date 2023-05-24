@@ -57,6 +57,8 @@ feature_bc_config:
   read_cellular_bc: "R1"
   # Hamming distance to collapse barcodes with umicollapse
   hamming_distance: 4 
+  reads_cutoff: 10
+  umi_cutoff: 3
   # Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
   # Special characters won't be escaped.  
   bc_patterns:

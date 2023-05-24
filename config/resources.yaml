@@ -25,5 +25,9 @@ barcode_exploration:
     MaxMem: 50000
 
 merge_seurat:
-    cpu : 10
+    cpu : 1
     MaxMem: 100000
+
+barcode_filtering:
+    cpu : 5
+    MaxMem: 30000
