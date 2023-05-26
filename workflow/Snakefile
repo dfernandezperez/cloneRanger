@@ -68,4 +68,4 @@ elif config["10x_pipeline"] in ["ARC", "ATAC"]:
 
 rule all:
     input:
-        target_files
+        expand("results/02_createSeurat/seurat_{sample}_noDoublets.rds", sample = SAMPLES)

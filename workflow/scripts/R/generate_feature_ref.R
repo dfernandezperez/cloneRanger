@@ -5,21 +5,20 @@ sink(log, type = "message")
 library(tidyverse)
 
 #------------------------------------------------------------------------------------------
-# Load feature ref from every sample and merge it into 1
+# Load feature ref from larry/cellhashing
 #------------------------------------------------------------------------------------------
-feature_ref <- snakemake@input %>%
-  purrr::map(read_csv) %>% 
-  bind_rows() %>% 
-  mutate(
-    id    = str_replace(id, "_.*$", ""),
-    name = id
-  ) %>% 
-  distinct() %>% 
-  group_by(id) %>% 
-  mutate(
-    id   = paste0(id, "_", 1:n()),
-    name = id
-  ) %>%
-  select(id, name, read, pattern, sequence, feature_type)
+if (length(snakemake@input) == 1) {
 
-write_csv(feature_ref, snakemake@output[[1]])
+	# If just cellhash or larry are set, return the same csv
+	feature_ref <- read_csv(snakemake@input[[1]])
+	write_csv(feature_ref, snakemake@output[[1]])
+
+} else { # Otherwise combine both larry and cellhash references into 1
+
+	larry_ref    <- read_csv(snakemake@input[["larry_ref"]])
+	cellhash_ref <- read_csv(snakemake@input[["cell_hash_ref"]])
+
+	combined_ref <- bind_rows(larry_ref, cellhash_ref)
+	write_csv(combined_ref, snakemake@output[[1]])
+
+}

@@ -1,20 +1,24 @@
 if config["10x_pipeline"] == "GEX":
 
-    # No conda env used as cellranger cannot be installed in one
     rule cellranger_count:
         input:
-            fq = lambda w: expand(
-                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
-                                sample   = w.sample,
-                                lib_type = SAMPLE_LIB_DICT[w.sample],
-                                read     = ["R1", "R2"]
-                            ),
-            multi_ref = "data/feature_bc_libraries/{sample}_library_multi.csv"
+            unpack(get_cellranger_input)
         output:
-            filt_mtx = directory("results/01_counts/{sample}/outs/per_sample_outs/"),
-            raw_mtx  = directory("results/01_counts/{sample}/outs/multi/count/raw_feature_bc_matrix/")
+            mtx  = "results/01_counts/{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
+            outs = directory("results/01_counts/{sample}/outs/filtered_feature_bc_matrix"),
+            html = report(
+                "results/01_counts/{sample}/outs/web_summary.html",
+                caption  = "../reports/counts.rst",
+                category = "Cellranger Counts",
+                subcategory = "{sample}",
+            ),
         params:
-            mem_gb = config["cellranger_count"]["mem"]
+            introns     = convert_introns(),
+            n_cells     = get_expected_cells(),
+            genome      = config["genome_reference_gex"],
+            extra_p     = config["cellranger_count"]["extra_parameters_rna"],
+            mem_gb      = config["cellranger_count"]["mem"],
+            feature_ref = get_feature_ref
         log:
             "results/00_logs/counts/{sample}.log",
         benchmark:
@@ -27,9 +31,14 @@ if config["10x_pipeline"] == "GEX":
             config["cellranger_rna_sif"]
         shell:
             """
-            cellranger multi \
-            --id={wildcards.sample} \
-            --csv={input.multi_ref} \
+            cellranger count \
+            {params.feature_ref} \
+            {params.n_cells} \
+            {params.extra_p}  \
+            {params.introns} \
+            --id {wildcards.sample} \
+            --transcriptome {params.genome} \
+            --libraries {input.libraries} \
             --localcores {threads} \
             --localmem {params.mem_gb} \
             &> {log} && \
@@ -37,7 +46,7 @@ if config["10x_pipeline"] == "GEX":
             # is a problem to move the cellranger output files. The workaround of deleting that folder fixes that.
             rm -r results/01_counts/{wildcards.sample} && \
             mv {wildcards.sample} results/01_counts/{wildcards.sample}
-        """
+            """
 
 
 elif config["10x_pipeline"] == "ATAC":
@@ -108,7 +117,7 @@ elif config["10x_pipeline"] == "ARC":
             introns = convert_introns(),
             genome  = config["genome_refrerence_arc"],
             mem_gb  = config["cellranger_count"]["mem"],
-            extra_p = config["cellranger_count"]["extra_parameters_atac"]
+            extra_p = config["cellranger_count"]["extra_parameters_rna"]
         log:
             "results/00_logs/counts/{sample}.log",
         benchmark:

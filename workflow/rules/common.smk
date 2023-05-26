@@ -56,6 +56,13 @@ def get_expected_cells():
         return f'--expect-cells {config["cellranger_count"]["n_cells"]}'
 
 
+def get_feature_ref(wildcards):
+    if is_feature_bc() or is_cell_hashing(wildcards.sample):
+        return f"--feature-ref data/feature_reference/Feature-reference_{wildcards.sample}.csv"        
+    else:
+         return ""
+
+
 def is_feature_bc():
     """Specify whether feature barcoding has been performed
     or not
@@ -91,68 +98,25 @@ def get_library_type(wildcards):
 
     for lib_type in lib_type_col:
         if lib_type == 'GEX':
-            lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Gene Expression'
+            lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Gene Expression'
         elif lib_type == 'ATAC':
-            lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Chromatin Accessibility'
+            lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Chromatin Accessibility'
         # Use and if statement for larry and cellhashing data, in case we want to analzye the libs
         # without some of them despite having the larry/ch fastq files in units.tsv.  
         elif lib_type == 'FB':
             if not is_feature_bc():
                 next
             else:
-                lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Custom'
+                lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Custom'
         elif lib_type == 'CH':
             if not is_cell_hashing(wildcards.sample):
                 next
             else:
-                lib_types[lib_type] = f'{wildcards.sample}_{lib_type},{abs_path}/data/clean,Multiplexing Capture'
+                lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Antibody Capture'
         else:
             sys.exit("Library type must be GEX, FB, ATAC or CH.")
 
     return '\n'.join(lib_types.values())
-
-
-def get_library_input(wildcards):
-    if is_feature_bc() and is_cell_hashing(wildcards.sample):
-        return {
-            "fq"      : expand(
-                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
-                                sample   = wildcards.sample,
-                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
-                                read     = ["R1", "R2"]
-                            ),
-            "larry"   : "data/feature_reference/Feature_reference.csv",
-            "cmo_set" : "data/feature_bc_libraries/cmo-set.csv"
-        }
-    elif is_feature_bc() and not is_cell_hashing(wildcards.sample):
-        return {
-            "fq"      : expand(
-                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
-                                sample   = wildcards.sample,
-                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
-                                read     = ["R1", "R2"]
-                            ),
-            "larry"   : "data/feature_reference/Feature_reference.csv"
-        }
-    elif not is_feature_bc() and not is_cell_hashing(wildcards.sample):
-        return {
-            "fq"      : expand(
-                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
-                                sample   = wildcards.sample,
-                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
-                                read     = ["R1", "R2"]
-                            ),
-        }
-    elif not is_feature_bc() and is_cell_hashing(wildcards.sample):
-        return {
-            "fq"      : expand(
-                                "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
-                                sample   = wildcards.sample,
-                                lib_type = SAMPLE_LIB_DICT[wildcards.sample],
-                                read     = ["R1", "R2"]
-                            ),
-            "cmo_set" : "data/feature_bc_libraries/cmo-set.csv"
-        }
 
 
 def get_cellranger_mtx(wildcards):
@@ -167,3 +131,50 @@ def get_seurat_rds(wildcards):
         return expand("results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds", sample = SAMPLES)
     else:
         return expand("results/02_createSeurat/seurat_{sample}_noDoublets.rds", sample = SAMPLES)
+
+
+def get_cellranger_input(wildcards):
+    if is_feature_bc() or is_cell_hashing(wildcards.sample):
+        return {
+            "fq" : expand(
+                        "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                        sample   = wildcards.sample,
+                        lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                        read     = ["R1", "R2"]
+                        ),
+            "libraries"   : "data/feature_bc_libraries/{sample}_library.csv",
+            "feature_ref" : "data/feature_reference/Feature-reference_{sample}.csv",            
+        }
+    else:
+         return {
+            "fq" : expand(
+                        "data/clean/{sample}_{lib_type}_S1_L001_{read}_001.fastq.gz", 
+                        sample   = wildcards.sample,
+                        lib_type = SAMPLE_LIB_DICT[wildcards.sample],
+                        read     = ["R1", "R2"]
+                        ),
+            "libraries"   : "data/feature_bc_libraries/{sample}_library.csv"
+        }
+
+
+def get_feature_ref_input(wildcards):
+    if is_feature_bc():
+    
+        if is_cell_hashing(wildcards.sample):
+
+            return {
+                "cell_hash_ref" : "data/cellhashing/cellhashing-reference_{sample}.csv",
+                "larry_ref"     : "data/feature_reference/Feature_reference_larry.csv"
+            }     
+
+        else:
+
+            return {
+                "larry_ref" : "data/feature_reference/Feature_reference_larry.csv"
+            }
+
+    else:
+        # If no larry/cellhashing is performed, this file has
+        return {
+            "cell_hash_ref" : "data/cellhashing/cellhashing-reference_{sample}.csv"
+        }

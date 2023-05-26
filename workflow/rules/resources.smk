@@ -119,6 +119,7 @@ rule move_atac_fq:
         mv {input.r3} {output.r3}
         """
 
+
 rule create_library:
     input:
         expand("data/clean/{{sample}}_{lib_type}_S1_L001_{read}_001.fastq.gz", lib_type = LIB_TYPES, read = ["R1", "R2"]),
@@ -132,29 +133,30 @@ rule create_library:
         echo "{params.library_types}" >> {output}
         """
 
-rule create_cmo_set:
-    output:
-        "data/feature_bc_libraries/cmo-set.csv"
-    params:
-        cell_hashing = CELL_HASHING["barcodes"],
-    script:
-        "../scripts/python/create_cmo_set.py"
 
-
-rule create_library_multi:
-    input:
-        unpack(get_library_input)
+rule create_cellhashing_ref:
     output:
-        "data/feature_bc_libraries/{sample}_library_multi.csv"
+        "data/cellhashing/cellhashing-reference_{sample}.csv"
     params:
-        library_types     = get_library_type,
-        cell_hashing      = CELL_HASHING["assignments"],
-        cellranger_params = config["cellranger_count"]["extra_parameters_rna"],
-        introns           = convert_introns(),
-        n_cells           = get_expected_cells(),
-        genome            = config["genome_reference_gex"],
-        mem_gb            = config["cellranger_count"]["mem"],
+        cell_hashing       = CELL_HASHING["barcodes"],
+        cellhash_ab_names  = lambda w: CELL_HASHING["assignments"][w.sample]
     log:
-        "results/00_logs/create_library_multi/{sample}.log"
+        "results/00_logs/create_cellhashing_ref/{sample}.log"
     script:
-        "../scripts/python/create_multi_library.py"
+        "../scripts/python/generate_cellhashing_ref.py"
+
+
+rule generate_feature_ref:
+    input:
+        unpack(get_feature_ref_input)
+    output:
+        "data/feature_reference/Feature-reference_{sample}.csv"
+    params:
+        cell_hashing       = CELL_HASHING["barcodes"],
+        cellhash_ab_names  = lambda w: CELL_HASHING["assignments"][w.sample],
+    log:
+        "results/00_logs/generate_feature_ref/{sample}.log"
+    conda:
+        "../envs/Seurat.yaml"
+    script:
+        "../scripts/R/generate_feature_ref.R"

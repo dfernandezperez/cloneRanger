@@ -12,7 +12,6 @@ genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellra
 # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
 10x_pipeline : "GEX"
 
-
 # human or mouse
 species: "mouse"
 
@@ -25,26 +24,7 @@ cellranger_count:
   n_cells: "auto"
   mem: 120
   extra_parameters_atac: "--nosecondary"
-# When cell hashing is applied all the configuration must be introduced in a different way
-# respect to the standard cellranger pipeline. Until I find a nice workaround for this,
-# all the RNA (gex) pipelines will be executed with cellranger multi to make the pipeline
-# less complex:
-# the cellranger settings when cellhashing is being used MUST be specified here. The parameters:
-# expect-cells,<int>
-# force-cells,<int>
-# no-secondary,<true|false>
-# no-bam,<true|false>
-# check-library-compatibility,<true|false>
-# target-panel,/path/to/target/panel, # Required, Targeted GEX only.
-# no-target-umi-filter,<true|false>, # Optional, Targeted GEX only.
-# include-introns,<true|false>
-# min-assignment-confidence,<0.9>, # Optional, Cell Multiplexing only.
-# cmo-set,/path/to/CMO/reference, # Optional, Cell Multiplexing only.
-# barcode-sample-assignment,/path/to/barcode-sample-assignment/csv, # Optional, Cell Multiplexing 
-  extra_parameters_rna:
-    - no-secondary,true
-    - include-introns,true
-    - min-assignment-confidence,0.7
+  extra_parameters_rna: "--nosecondary"
 
 
 # feature barcodoing parameters/settings

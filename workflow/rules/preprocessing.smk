@@ -1,19 +1,17 @@
 rule create_seurat:
     input:
-        cellranger_mtx = get_cellranger_mtx
+        "results/01_counts/{sample}/outs/filtered_feature_bc_matrix"
     output:
         no_doublets = "results/02_createSeurat/seurat_{sample}_noDoublets.rds",
         raw         = "results/02_createSeurat/seurat_{sample}_raw.rds"
     params:
-        subsample_names = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "",
-        cell_assign     = lambda w: "results/01_counts/{sample}/outs/multi/multiplexing_analysis/assignment_confidence_table.csv".format(sample = w.sample) if is_cell_hashing(w.sample) else "",
         is_cell_hashing = lambda w: "TRUE" if is_cell_hashing(w.sample) else "FALSE",
+        cellhash_names  = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "FALSE",
         is_larry        = "TRUE" if is_feature_bc() else "FALSE",
         min_cells_gene  = config["preprocessing"]["min_cells_gene"],
         min_cells_larry = config["preprocessing"]["min_cells_larry"],
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
-        sample_path     = lambda w: "results/01_counts/{sample}/outs/per_sample_outs/{sample}/count/sample_filtered_feature_bc_matrix".format(sample = w.sample)
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -28,13 +26,34 @@ rule create_seurat:
         "../scripts/R/create_seurat.R"
 
 
+rule cellhashing_demultiplex:
+    input:
+        "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
+    output:
+        rds = "results/02_createSeurat/seurat_{sample}_noDoublets_demultiplex.rds"
+    params:
+        cellhash_names = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "",
+    conda:
+         "../envs/Seurat.yaml"
+    threads:
+        RESOURCES["barcode_filtering"]["cpu"]
+    resources:
+        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+    log:
+        "results/00_logs/cellhashing_demultiplex/{sample}.log"
+    benchmark:
+        "results/benchmarks/cellhashing_demultiplex/{sample}_benchmark.txt"
+    script:
+        "../scripts/R/cellhashing_demultiplex.Rmd"
+
+
 rule barcode_summary:
     input:
         "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
     output:
-        html = "results/05_barcode-exploration/{sample}_barcode_filtering.html"
+        html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
     params:
-        molecule_info = lambda w: "results/01_counts/{sample}/outs/multi/count/raw_molecule_info.h5".format(sample = w.sample),
+        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
     conda:
          "../envs/Seurat.yaml"
     threads:
@@ -57,7 +76,7 @@ rule barcode_filtering:
     params:
         reads_cutoff  = config["feature_bc_config"]["reads_cutoff"],
         umi_cutoff    = config["feature_bc_config"]["umi_cutoff"],
-        molecule_info = lambda w: "results/01_counts/{sample}/outs/multi/count/raw_molecule_info.h5".format(sample = w.sample),
+        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
     conda:
          "../envs/Seurat.yaml"
     threads:

@@ -81,7 +81,7 @@ rule merge_corrected_fastq:
         """
 
 
-rule generate_feature_ref:
+rule generate_feature_ref_larry:
     input:
         expand(
             "data/feature_reference/{sample}_{read_fb}_{larry_color}_hd{hd}_feature_reference.csv", 
@@ -91,10 +91,10 @@ rule generate_feature_ref:
             hd          = config["feature_bc_config"]["hamming_distance"]
         )
     output:
-        "data/feature_reference/Feature_reference.csv"
+        "data/feature_reference/Feature_reference_larry.csv"
     log:
         "results/00_logs/generate_feature_ref/log"
     conda:
         "../envs/Seurat.yaml"
     script:
-        "../scripts/R/generate_feature_ref.R"
+        "../scripts/R/generate_feature_ref_larry.R"
