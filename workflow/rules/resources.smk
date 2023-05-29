@@ -151,9 +151,6 @@ rule generate_feature_ref:
         unpack(get_feature_ref_input)
     output:
         "data/feature_reference/Feature-reference_{sample}.csv"
-    params:
-        cell_hashing       = CELL_HASHING["barcodes"],
-        cellhash_ab_names  = lambda w: CELL_HASHING["assignments"][w.sample],
     log:
         "results/00_logs/generate_feature_ref/{sample}.log"
     conda:
