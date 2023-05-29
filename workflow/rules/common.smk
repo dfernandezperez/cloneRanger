@@ -30,13 +30,13 @@ def convert_introns():
     For ease of use, the user only specifies True or False
     This function handles the conversion.
     """
-    if config["10x_pipeline"] == "GEX":
+    if config["cellranger_count"]["10x_pipeline"] == "GEX":
         if not config["cellranger_count"]["introns"]:
             return "--include-introns False"
         else:
             return ""
 
-    elif config["10x_pipeline"] == "ARC":
+    elif config["cellranger_count"]["10x_pipeline"] == "ARC":
         if not config["cellranger_count"]["introns"]:
             return "--gex-exclude-introns"
         else:
@@ -46,14 +46,14 @@ def convert_introns():
         sys.exit("Intronic use can be only specified if 10x_pipeline == GEX or GEX_ATAC")
 
 
-def get_expected_cells():
+def get_expected_cells(wildcards):
     """Function to set the number of expected cells if it was set by the user,
     otherwise estimate them automatically by cellranger.
     """
-    if config["cellranger_count"]["n_cells"] == "auto":
+    if sample_config["UMI_cutoff"][wildcards.sample] == "auto":
         return ""
     else:
-        return f'--expect-cells {config["cellranger_count"]["n_cells"]}'
+        return f'--expect-cells {sample_config["UMI_cutoff"][wildcards.sample]}'
 
 
 def get_feature_ref(wildcards):
@@ -67,7 +67,7 @@ def is_feature_bc():
     """Specify whether feature barcoding has been performed
     or not
     """
-    if config["feature_bc_config"]["feature_bc"]:
+    if LARRY["feature_bc"]:
         return True
     else:
         return False

@@ -1,6 +1,8 @@
-units       : config/units.tsv
-resources   : config/resources.yaml
-cell_hashing: config/cell_hashing.yaml
+units        : config/samples/units.tsv
+sample_config: config/samples/sample_config.tsv
+resources    : config/resources.yaml
+larry_config : config/larry_config.yaml
+cell_hashing : config/cellhash_config.yaml
 
 # Singularity images, reference genome, library and feature-ref (last 2 in case feature barcoding is performed)
 cellranger_rna_sif      : /stemcell/data/Singularity_images/cellranger_7.1.0.sif
@@ -9,49 +11,23 @@ cellranger_atac_sif     : /stemcell/data/Singularity_images/cellranger_atac_2.1.
 genome_reference_gex    : /stemcell/scratch/References/Cellranger/refdata-gex-mm10-2020-A
 genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellranger-arc-mm10-2020-A-2.0.0
 
-# 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
-10x_pipeline : "GEX"
-
-# human or mouse
-species: "mouse"
-
 
 # Cellranger count parameters
 cellranger_count:
+  # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
+  10x_pipeline : "GEX"
   introns: True
-  # Set auto for default cellranger expected number of cells. JUST FOR ATAC OR ARC
-  # FOR RNA SPECIFY THE NUMBER OF CELLS IN extra_parameters_rna (default = auto).
-  n_cells: "auto"
   mem: 120
   extra_parameters_atac: "--nosecondary"
   extra_parameters_rna: "--nosecondary"
-
-
-# feature barcodoing parameters/settings
-feature_bc_config:
-  # Does the data contain feature barcoding data or not
-  feature_bc: True
-  # Fastq in which the barcode is located. Can be R1 or R2
-  read_feature_bc: "R2"
-  # Fastq in which the cellular barcode is located. Must be the opposite of read_feature_bc
-  read_cellular_bc: "R1"
-  # Hamming distance to collapse barcodes with umicollapse
-  hamming_distance: 4 
-  reads_cutoff: 10
-  umi_cutoff: 3
-  # Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
-  # Special characters won't be escaped.  
-  bc_patterns:
-    "GCTGAA....TG....CA....GT....AG...." : "Scarlet"
 
 
 # Parameters regarding preprocessing of Seurat object
 preprocessing:
   # Min number of cells that must express a gene to include it in the final matrix
   min_cells_gene : 5
-  # Min number of cells that must express a larry bc to include it in the final matrix
-  # If there is not larry barcode in the samples this parameter will be ignored
-  min_cells_larry: 2
+  # human or mouse
+  species: "mouse"
   mito_pattern   : "^mt-"
   ribo_pattern   : "^Rpl|^Rps"
   marker_genes   :

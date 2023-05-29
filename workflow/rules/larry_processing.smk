@@ -1,18 +1,18 @@
 rule extract_barcodes:
     input: 
-        fb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_feature_bc"]),
-        cb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"]),
+        fb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(LARRY["read_feature_bc"]),
+        cb = "data/lane_merged/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(LARRY["read_cellular_bc"]),
     output:
         filt_fb = temp(
             expand(
                 "data/bc_filt/{{sample}}_FB_S1_L001_{read_fb}_001_{larry_color}.fastq.gz", 
                 larry_color = LARRY_COLORS, 
-                read_fb = config["feature_bc_config"]["read_feature_bc"]
+                read_fb = LARRY["read_feature_bc"]
                 )
             ),
-        filt_cb = "data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(config["feature_bc_config"]["read_cellular_bc"])
+        filt_cb = "data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(LARRY["read_cellular_bc"])
     params:
-        barcode_dict = config["feature_bc_config"]["bc_patterns"]
+        barcode_dict = LARRY["bc_patterns"]
     log:
         "results/00_logs/extract_barcodes/{sample}.log"
     benchmark:
@@ -67,7 +67,7 @@ rule merge_corrected_fastq:
         expand(
             "data/corrected/{{sample}}_FB_S1_L001_{{read_fb}}_001_{larry_color}_collapsed-hd{hd}-corrected.fastq.gz",
             larry_color = LARRY_COLORS,
-            hd          = config["feature_bc_config"]["hamming_distance"]
+            hd          = LARRY["hamming_distance"]
         )
     output:
         "data/clean/{sample}_FB_S1_L001_{read_fb}_001.fastq.gz"
@@ -86,9 +86,9 @@ rule generate_feature_ref_larry:
         expand(
             "data/feature_reference/{sample}_{read_fb}_{larry_color}_hd{hd}_feature_reference.csv", 
             sample      = SAMPLES,
-            read_fb     = config["feature_bc_config"]["read_feature_bc"],
+            read_fb     = LARRY["read_feature_bc"],
             larry_color = LARRY_COLORS,
-            hd          = config["feature_bc_config"]["hamming_distance"]
+            hd          = LARRY["hamming_distance"]
         )
     output:
         "data/feature_reference/Feature_reference_larry.csv"

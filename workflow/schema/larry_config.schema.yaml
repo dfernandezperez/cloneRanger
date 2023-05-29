@@ -1,0 +1,14 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: "Configuration file of LARRY barcode analysis and processing"
+
+type: object
+
+properties:
+  feature_bc      : { type: boolean, description: "Is there feature barcoding data?" }
+  read_feature_bc : { type: string, enum: ["R1", "R2"], description: "Read in which larry barcode is present" }
+  read_cellular_bc: { type: string, enum: ["R1", "R2"], description: "Read in which cellular barcode is present"  }
+  hamming_distance: { type: integer }
+  reads_cutoff    : { type: integer }
+  umi_cutoff      : { type: integer }
+  bc_patterns     : { type: object }

@@ -11,10 +11,11 @@ properties:
   resources:
     type: string
 
-  species:
-    description: Sample species
-    type       : string
-    enum       : [human, mouse]
+  sample_config:
+    type: string
+  
+  cell_hashing:
+    type: string
 
   cellranger_rna_sif:
     description: Singularity image to execute cellranger count (RNA)
@@ -36,17 +37,12 @@ properties:
     description: 10X reference genome for cellranger-arc and cellranger-atac count
     type       : string
 
-  10x_pipeline:
-    description: Type of 10X pipeline. Can be RNA alone (GEX), ATAC alone (ATAC) or multiome -RNA+ATAC- (ARC)
-    type       : string
-    enum       : [ GEX, ATAC, ARC]
-
   cellranger_count:
     type: object
     properties:
-      introns: { type: boolean }
-      n_cells: { oneOf: [ { type: integer },  { type: string, enum: ["auto"] } ] }
-      mem    : { type: integer }
+      10x_pipeline: { type: string, enum: [ GEX, ATAC, ARC ], description: Type of 10X pipeline. Can be RNA alone (GEX), ATAC alone (ATAC) or multiome -RNA+ATAC- (ARC)}
+      introns     : { type: boolean }
+      mem         : { type: integer }
 
   feature_bc_config:
     type: object
@@ -63,3 +59,6 @@ properties:
     type: object
     properties:
       min_cells: { type: integer, minimum: 0, description: "Minimum number of cells that must express a feature."}
+      species  : { type: string, enum: [human, mouse], description: Sample species }
+
+      n_cells     : { oneOf: [ { type: integer },  { type: string, enum: ["auto"] } ] }

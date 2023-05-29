@@ -9,7 +9,7 @@ rule create_seurat:
         cellhash_names  = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "FALSE",
         is_larry        = "TRUE" if is_feature_bc() else "FALSE",
         min_cells_gene  = config["preprocessing"]["min_cells_gene"],
-        min_cells_larry = config["preprocessing"]["min_cells_larry"],
+        umi_cutoff      = lambda w: sample_config["UMI_cutoff"][w.sample],
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
     conda:
@@ -24,27 +24,6 @@ rule create_seurat:
         "results/benchmarks/create_seurat/{sample}_benchmark.txt"
     script:
         "../scripts/R/create_seurat.R"
-
-
-rule cellhashing_demultiplex:
-    input:
-        "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
-    output:
-        rds = "results/02_createSeurat/seurat_{sample}_noDoublets_demultiplex.rds"
-    params:
-        cellhash_names = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "",
-    conda:
-         "../envs/Seurat.yaml"
-    threads:
-        RESOURCES["barcode_filtering"]["cpu"]
-    resources:
-        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
-    log:
-        "results/00_logs/cellhashing_demultiplex/{sample}.log"
-    benchmark:
-        "results/benchmarks/cellhashing_demultiplex/{sample}_benchmark.txt"
-    script:
-        "../scripts/R/cellhashing_demultiplex.Rmd"
 
 
 rule barcode_summary:
@@ -74,8 +53,8 @@ rule barcode_filtering:
     output:
         "results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds"
     params:
-        reads_cutoff  = config["feature_bc_config"]["reads_cutoff"],
-        umi_cutoff    = config["feature_bc_config"]["umi_cutoff"],
+        reads_cutoff  = LARRY["reads_cutoff"],
+        umi_cutoff    = LARRY["umi_cutoff"],
         molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
     conda:
          "../envs/Seurat.yaml"
@@ -117,7 +96,7 @@ rule RNA_exploration:
         html = "results/04_RNA-exploration/RNA_exploration.html"
     params:
         marker_genes  = config["preprocessing"]["marker_genes"],
-        species       = config["species"],
+        species       = config["preprocessing"]["species"],
         cluster_degs  = "results/04_RNA-exploration/cluster_degs.tsv",
         sample_degs   = "results/04_RNA-exploration/sample_degs.tsv"
     conda:

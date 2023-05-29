@@ -1,4 +1,4 @@
-if config["10x_pipeline"] == "GEX":
+if config["cellranger_count"]["10x_pipeline"] == "GEX":
 
     rule cellranger_count:
         input:
@@ -14,7 +14,7 @@ if config["10x_pipeline"] == "GEX":
             ),
         params:
             introns     = convert_introns(),
-            n_cells     = get_expected_cells(),
+            n_cells     = get_expected_cells,
             genome      = config["genome_reference_gex"],
             extra_p     = config["cellranger_count"]["extra_parameters_rna"],
             mem_gb      = config["cellranger_count"]["mem"],
@@ -49,7 +49,7 @@ if config["10x_pipeline"] == "GEX":
             """
 
 
-elif config["10x_pipeline"] == "ATAC":
+elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
    rule cellranger_count:
         input:
             lambda w: expand("data/clean/{{sample}}_ATAC_S1_L001_{read}_001.fastq.gz", read=["R1", "R2"])
@@ -91,7 +91,7 @@ elif config["10x_pipeline"] == "ATAC":
             mv {wildcards.sample} results/01_counts/{wildcards.sample}
         """
 
-elif config["10x_pipeline"] == "ARC":
+elif config["cellranger_count"]["10x_pipeline"] == "ARC":
     rule cellranger_count:
         input:
             fq_gex  = expand(

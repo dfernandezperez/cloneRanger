@@ -14,19 +14,26 @@ container : "docker://condaforge/mambaforge:4.10.3-6"
 units       = pd.read_csv(config["units"], dtype = str, sep = "\t").set_index(["sample_id", "lib_type", "lane"], drop = False).sort_index()
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
+# load sample_config and transfrom it to dict format
+sample_config = pd.read_csv(config["sample_config"], sep = "\t").set_index("sample_id", drop = False)
+
 # Resources and cell hashing information yaml files
 RESOURCES    = yaml.load(open(config['resources'], 'r'), Loader=yaml.FullLoader)
 CELL_HASHING = yaml.load(open(config['cell_hashing'], 'r'), Loader=yaml.FullLoader)
+LARRY        = yaml.load(open(config['larry_config'], 'r'), Loader=yaml.FullLoader)
 
 # Validate structures
 validate(units, schema = "schema/units.schema.yaml")
+validate(sample_config, schema = "schema/sample_config.schema.yaml")
 validate(config, schema = "schema/config.schema.yaml")
 validate(CELL_HASHING, schema = "schema/cell_hashing.schema.yaml")
+validate(LARRY, schema = "schema/larry_config.schema.yaml")
 
 # Store sample names, larry colors and lib tyes in variables.
-SAMPLES      = set(units["sample_id"])
-LARRY_COLORS = [color for color in config["feature_bc_config"]["bc_patterns"].values()]
-LIB_TYPES    = set(units["lib_type"])
+sample_config = sample_config.to_dict()
+SAMPLES       = set(units["sample_id"])
+LARRY_COLORS  = [color for color in LARRY["bc_patterns"].values()]
+LIB_TYPES     = set(units["lib_type"])
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -53,19 +60,19 @@ for sample,lib_type in zip(units["sample_id"].values, units["lib_type"].values):
 # Rule all
 #-----------------------------------------------------------------------------------------------------------------------
 # Define target files based on pipeline
-if config["10x_pipeline"] == "GEX" and is_feature_bc():
+if config["cellranger_count"]["10x_pipeline"] == "GEX" and is_feature_bc():
     target_files = [
         "results/04_RNA-exploration/RNA_exploration.html",
-        expand("results/05_barcode-exploration/{sample}_barcode_filtering.html", sample = SAMPLES),
+        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES),
         "results/05_barcode-exploration/barcode_exploration.html"
         ]
 
-elif config["10x_pipeline"] == "GEX" and not is_feature_bc():
+elif config["cellranger_count"]["10x_pipeline"] == "GEX" and not is_feature_bc():
     target_files = "results/04_RNA-exploration/RNA_exploration.html"
     
-elif config["10x_pipeline"] in ["ARC", "ATAC"]:
+elif config["cellranger_count"]["10x_pipeline"] in ["ARC", "ATAC"]:
     target_files = expand("results/01_counts/{sample}/outs/filtered_feature_bc_matrix.h5", sample = SAMPLES)
 
 rule all:
     input:
-        expand("results/02_createSeurat/seurat_{sample}_noDoublets.rds", sample = SAMPLES)
+        target_files

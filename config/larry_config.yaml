@@ -1,0 +1,14 @@
+# Does the data contain larry data or not
+feature_bc: True
+# Fastq in which the barcode is located. Can be R1 or R2
+read_feature_bc: "R2"
+# Fastq in which the cellular barcode is located. Must be the opposite of read_feature_bc
+read_cellular_bc: "R1"
+# Hamming distance to collapse barcodes with umicollapse
+hamming_distance: 4 
+reads_cutoff: 10
+umi_cutoff: 3
+# Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
+# Special characters won't be escaped.  
+bc_patterns:
+  "GCTGAA....TG....CA....GT....AG...." : "Scarlet"

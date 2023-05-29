@@ -1,0 +1,23 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: Sample configuration file. Every row represents one single-cell library.
+
+type: object
+
+properties:
+  sample_id:
+    type       : string
+    description: sample name/id the unit has been sequenced from
+
+  UMI_cutoff:
+    type       : integer
+    description: UMI filter to be applied on cells prior to doublet removal, cellhashing assignment and larry barcode calling
+
+  n_cells:
+    oneOf      : [ { type: integer },  { type: string, enum: ["auto"] } ]
+    description: Number of cells to force in cellranger. Auto will allow cellranger to autoestimate it (default)
+
+required:
+  - sample_id
+  - UMI_cutoff
+  - n_cells
