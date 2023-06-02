@@ -7,7 +7,7 @@ library(tidyverse)
 #------------------------------------------------------------------------------------------
 # Load feature ref from larry/cellhashing
 #------------------------------------------------------------------------------------------
-if (length(snakemake@input) == 1) {
+if (length(snakemake@input[[1]]) == 1) {
 
 	# If just cellhash or larry are set, return the same csv
 	feature_ref <- read_csv(snakemake@input[[1]])
