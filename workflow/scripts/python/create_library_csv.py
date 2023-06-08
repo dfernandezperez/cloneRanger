@@ -50,15 +50,20 @@ with open(snakemake.output["library"], 'wt') as output_handle:
 # Create library dict for arc
 ########################################################################################################
 # If the library is multiome and there is feature barcode data, the pipeline must be run 2 times
-# One for rna + larry and the other for rna+atac. Due to this, we need 2 different library csv files. 
-lib_csv2 = "If library type is not ARC, ignore this file."
+# One for rna + larry and the other for rna+atac. Due to this, we need 2 different library csv files.
 if lib_type == 'ARC' and is_feature_bc:
+
     lib_csv2 = dict()
     lib_csv2['ATAC'] = f'{abs_path}/data/clean,{sample}_ATAC,Chromatin Accessibility'
     lib_csv2['GEX']  = f'{abs_path}/data/clean,{sample}_GEX,Gene Expression'
 
-# Save library (arc) dict to csv
-out_csv2 = '\n'.join(lib_csv2.values())
-with open(snakemake.output["library_arc"], 'wt') as output_handle:
-    output_handle.write("fastqs,sample,library_type\n")
-    output_handle.write(out_csv2)
+    # Save library (arc) dict to csv
+    out_csv2 = '\n'.join(lib_csv2.values())
+    with open(snakemake.output["library_arc"], 'wt') as output_handle:
+        output_handle.write("fastqs,sample,library_type\n")
+        output_handle.write(out_csv2)
+
+else:
+    lib_csv2 = "If library type is not ARC, ignore this file."
+    with open(snakemake.output["library_arc"], 'wt') as output_handle:
+        output_handle.write(lib_csv2)
