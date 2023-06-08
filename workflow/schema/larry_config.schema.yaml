@@ -11,4 +11,3 @@ properties:
   hamming_distance: { type: integer }
   reads_cutoff    : { type: integer }
   umi_cutoff      : { type: integer }
-  bc_patterns     : { type: object }
