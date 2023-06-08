@@ -7,15 +7,12 @@ sink(log, type = "message")
 library(Seurat)
 library(tidyverse)
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Main: # Create seurat object & calculate doublets
-#-----------------------------------------------------------------------------------------------------------------------
-seurat_objects <- map(snakemake@input, \(x) readRDS(x))
-
-if (length(seurat_objects) > 1) {
-    seurat <- merge(seurat_objects[[1]], seurat_objects[2:length(seurat_objects)])
+### Read and merge seurat objects if there are multiple samples
+if (length(snakemake@input[[1]] == 1)) {
+    seurat <- readRDS(snakemake@input[[1]])
 } else {
-    seurat <- unlist(seurat_objects)
+    seurat_objects <- map(snakemake@input, \(x) readRDS(x))
+    seurat         <- merge(seurat_objects[[1]], seurat_objects[2:length(seurat_objects)])
 }
 
 saveRDS(seurat, snakemake@output[["seurat"]])
