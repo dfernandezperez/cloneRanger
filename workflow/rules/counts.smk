@@ -92,7 +92,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
         """
 
 elif config["cellranger_count"]["10x_pipeline"] == "ARC":
-    rule cellranger_count:
+    rule cellranger_arc_count:
         input:
             fq_gex  = expand(
                             "data/clean/{sample}_GEX_S1_L001_{read}_001.fastq.gz", 
@@ -104,11 +104,12 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
                             sample = SAMPLES,
                             read   = ["R1", "R2", "R3"]
                         ),
-            libraries   = "data/feature_bc_libraries/{sample}_library.csv"
+            libraries   = "data/feature_bc_libraries/{sample}_library_arc.csv"
         output:
-            mtx  = "results/01_counts/{sample}/outs/filtered_feature_bc_matrix.h5",
+            mtx  = "results/01_arc/{sample}/outs/filtered_feature_bc_matrix.h5",
+            outs = directory("results/01_arc/{sample}/outs/filtered_feature_bc_matrix"),
             html = report(
-                "results/01_counts/{sample}/outs/web_summary.html",
+                "results/01_arc/{sample}/outs/web_summary.html",
                 caption     = "../reports/counts.rst",
                 category    = "Cellranger Counts",
                 subcategory = "{sample}",
@@ -117,11 +118,11 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             introns = convert_introns(),
             genome  = config["genome_refrerence_arc"],
             mem_gb  = config["cellranger_count"]["mem"],
-            extra_p = config["cellranger_count"]["extra_parameters_rna"]
+            extra_p = config["cellranger_count"]["extra_parameters_arc"]
         log:
-            "results/00_logs/counts/{sample}.log",
+            "results/00_logs/cellranger_arc_count/{sample}.log",
         benchmark:
-            "results/benchmarks/counts/{sample}.txt"
+            "results/benchmarks/cellranger_arc_count/{sample}.txt"
         threads:
             RESOURCES["cellranger_count"]["cpu"]
         resources:
@@ -141,6 +142,56 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             &> {log} && \
             # a folder in results/counts/{wildcards.sample} is automatically created due to the output declared, which 
             # is a problem to move the cellranger output files. The workaround of deleting that folder fixes that.
-            rm -r results/01_counts/{wildcards.sample} && \
-            mv {wildcards.sample} results/01_counts/{wildcards.sample}
+            rm -r results/01_arc/{wildcards.sample} && \
+            mv {wildcards.sample} results/01_arc/{wildcards.sample}
             """
+            
+    if is_feature_bc():
+        rule cellranger_count:
+            input:
+                unpack(get_cellranger_input)
+            output:
+                mtx  = "results/01_counts/{sample}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
+                outs = directory("results/01_counts/{sample}/outs/filtered_feature_bc_matrix"),
+                html = report(
+                    "results/01_counts/{sample}/outs/web_summary.html",
+                    caption  = "../reports/counts.rst",
+                    category = "Cellranger Counts",
+                    subcategory = "{sample}",
+                ),
+            params:
+                introns     = convert_introns(),
+                n_cells     = get_expected_cells,
+                genome      = config["genome_reference_gex"],
+                extra_p     = config["cellranger_count"]["extra_parameters_rna"],
+                mem_gb      = config["cellranger_count"]["mem"],
+                feature_ref = get_feature_ref
+            log:
+                "results/00_logs/counts/{sample}.log",
+            benchmark:
+                "results/benchmarks/counts/{sample}.txt"
+            threads:
+                RESOURCES["cellranger_count"]["cpu"]
+            resources:
+                mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
+            container: 
+                config["cellranger_rna_sif"]
+            shell:
+                """
+                cellranger count \
+                {params.feature_ref} \
+                {params.n_cells} \
+                {params.extra_p}  \
+                {params.introns} \
+                --id {wildcards.sample} \
+                --chemistry=ARC-v1 \
+                --transcriptome {params.genome} \
+                --libraries {input.libraries} \
+                --localcores {threads} \
+                --localmem {params.mem_gb} \
+                &> {log} && \
+                # a folder in results/counts/{wildcards.sample} is automatically created due to the output declared, which 
+                # is a problem to move the cellranger output files. The workaround of deleting that folder fixes that.
+                rm -r results/01_counts/{wildcards.sample} && \
+                mv {wildcards.sample} results/01_counts/{wildcards.sample}
+                """

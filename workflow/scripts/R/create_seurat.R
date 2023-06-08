@@ -21,14 +21,22 @@ create_seurat <- function(input_files, sample_name, cellhash_names, min_cells_ge
   data <- Read10X(data.dir = input_files)
   
   # Create seurat objects
-  seurat <- CreateSeuratObject(counts = data$`Gene Expression`, min.cells = min_cells_gene)
-  
-  if (is_cell_hashing) {
-    seurat[["Cellhashing"]] <- CreateAssayObject(counts = data$`Antibody Capture`)
-  }
-  
-  if (is_larry) {
-    seurat[["Larry"]] <- CreateAssayObject(counts = data$`Custom`)
+  if (is.list(data)) {
+
+    seurat <- CreateSeuratObject(counts = data$`Gene Expression`, min.cells = min_cells_gene)
+    
+    if (is_cell_hashing) {
+      seurat[["Cellhashing"]] <- CreateAssayObject(counts = data$`Antibody Capture`)
+    }
+    
+    if (is_larry) {
+      seurat[["Larry"]] <- CreateAssayObject(counts = data$`Custom`)
+    }
+
+  } else {
+
+    seurat <- CreateSeuratObject(counts = data, min.cells = min_cells_gene)
+
   }
   
   # Fix sample names. cellhashing column is added to be consistent with the structure of seurat objects
@@ -42,6 +50,49 @@ create_seurat <- function(input_files, sample_name, cellhash_names, min_cells_ge
   seurat <- subset(seurat, subset = nCount_RNA >= UMI_cutoff)
   
   return(seurat)
+
+}
+
+
+create_seurat_arc <- function(input_files, input_larry = NULL, sample_name, min_cells_gene = 1,
+                          is_larry = FALSE, UMI_cutoff = 0) {
+  # Load files
+  names(input_files) <- sample_name
+  arc <- Read10X(data.dir = input_files)
+  
+  if (is_larry) {
+
+    names(input_larry) <- sample_name
+    larry <- Read10X(data.dir = input_larry)
+
+    common_cells <- intersect(
+      colnames(larry$Custom),
+      colnames(arc$`Gene Expression`)
+    )
+
+    seurat            <- CreateSeuratObject(counts = arc$`Gene Expression`[,common_cells], min.cells = min_cells_gene)
+    seurat[["ATAC"]]  <- CreateAssayObject(counts = arc$`Peaks`[,common_cells])
+    seurat[["Larry"]] <- CreateAssayObject(counts = larry$Custom[,common_cells])
+
+  } else {
+
+    seurat           <- CreateSeuratObject(counts = arc$`Gene Expression`, min.cells = min_cells_gene)
+    seurat[["ATAC"]] <- CreateAssayObject(counts = arc$`Peaks`)
+
+  }
+  
+  # Fix sample names. cellhashing column is added to be consistent with the structure of seurat objects
+  # coming from libraries in which cellhashing has been performed.
+  # Also a subsample entry is created to be consistent with samples with cellhashing.
+  seurat$sample      <- sample_name
+  seurat$subsample   <- sample_name
+  Idents(seurat)     <- seurat$sample
+  
+  # Remove cells with less than UMI threshold
+  seurat <- subset(seurat, subset = nCount_RNA >= UMI_cutoff)
+  
+  return(seurat)
+
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -59,6 +110,7 @@ remove_doublets <- function(seurat, cores = 1) {
   print(table(seurat$scDblFinder.class))
   
   return(seurat)
+
 }
 
 
@@ -85,7 +137,6 @@ cell_hashing_assignment <- function(seurat, cellhash_names, sample_name) {
   return(seurat)
   
 }
-
 
 cell_hashing_assignment_seurat <- function(seurat, cellhash_names, sample_name) {
   
@@ -134,15 +185,30 @@ summary_cellhashing <- function(seurat, cellhash_names) {
 # Main & save output
 #-----------------------------------------------------------------------------------------------------------------------
 # Create seurat object & calculate doublets
-seurat <- create_seurat(
-  input_files     = snakemake@input[[1]],
-  sample_name     = snakemake@wildcards[["sample"]],
-  min_cells_gene  = snakemake@params[["min_cells_gene"]],
-  is_larry        = snakemake@params[["is_larry"]],
-  is_cell_hashing = snakemake@params[["is_cell_hashing"]],
-  cellhash_names  = snakemake@params[["cellhash_names"]],
-  UMI_cutoff      = snakemake@params[["umi_cutoff"]]
-)
+if (snakemake@params[["library_type"]] == "ARC") {
+
+  seurat <- create_seurat_arc(
+    input_files     = snakemake@input[["arc"]],
+    input_larry     = snakemake@input[["counts"]],
+    sample_name     = snakemake@wildcards[["sample"]],
+    min_cells_gene  = snakemake@params[["min_cells_gene"]],
+    is_larry        = snakemake@params[["is_larry"]],
+    UMI_cutoff      = snakemake@params[["umi_cutoff"]]
+  )
+
+} else {
+
+  seurat <- create_seurat(
+    input_files     = snakemake@input[["counts"]],
+    sample_name     = snakemake@wildcards[["sample"]],
+    min_cells_gene  = snakemake@params[["min_cells_gene"]],
+    is_larry        = snakemake@params[["is_larry"]],
+    is_cell_hashing = snakemake@params[["is_cell_hashing"]],
+    cellhash_names  = snakemake@params[["cellhash_names"]],
+    UMI_cutoff      = snakemake@params[["umi_cutoff"]]
+  )
+
+}
 
 # Remove doublets
 seurat <- remove_doublets(seurat, cores = snakemake@threads[[1]])

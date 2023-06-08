@@ -15,11 +15,12 @@ genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellra
 # Cellranger count parameters
 cellranger_count:
   # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
-  10x_pipeline : "GEX"
+  10x_pipeline : "ARC"
   introns: True
   mem: 120
   extra_parameters_atac: "--nosecondary"
   extra_parameters_rna: "--nosecondary"
+  extra_parameters_arc: ""
 
 
 # Parameters regarding preprocessing of Seurat object

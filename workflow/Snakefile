@@ -70,7 +70,18 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX" and is_feature_bc():
 elif config["cellranger_count"]["10x_pipeline"] == "GEX" and not is_feature_bc():
     target_files = "results/04_RNA-exploration/RNA_exploration.html"
     
-elif config["cellranger_count"]["10x_pipeline"] in ["ARC", "ATAC"]:
+elif config["cellranger_count"]["10x_pipeline"] == "ARC" and not is_feature_bc():
+    target_files = expand("results/01_arc/{sample}/outs/filtered_feature_bc_matrix.h5", sample = SAMPLES)
+
+elif config["cellranger_count"]["10x_pipeline"] == "ARC" and is_feature_bc():
+    target_files = [
+        "results/04_RNA-exploration/RNA_exploration.html",
+        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES),
+        expand("results/01_arc/{sample}/outs/filtered_feature_bc_matrix.h5", sample = SAMPLES),
+        "results/05_barcode-exploration/barcode_exploration.html"
+        ]
+
+elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
     target_files = expand("results/01_counts/{sample}/outs/filtered_feature_bc_matrix.h5", sample = SAMPLES)
 
 rule all:

@@ -1,6 +1,6 @@
 rule create_seurat:
     input:
-        "results/01_counts/{sample}/outs/filtered_feature_bc_matrix"
+        unpack(get_cellranger_output)
     output:
         no_doublets = "results/02_createSeurat/seurat_{sample}_noDoublets.rds",
         raw         = "results/02_createSeurat/seurat_{sample}_raw.rds"
@@ -12,6 +12,7 @@ rule create_seurat:
         umi_cutoff      = lambda w: sample_config["UMI_cutoff"][w.sample],
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
+        library_type    = config["cellranger_count"]["10x_pipeline"]
     conda:
          "../envs/Seurat.yaml"
     threads:

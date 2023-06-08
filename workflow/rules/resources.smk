@@ -124,14 +124,14 @@ rule create_library:
     input:
         expand("data/clean/{{sample}}_{lib_type}_S1_L001_{read}_001.fastq.gz", lib_type = LIB_TYPES, read = ["R1", "R2"]),
     output:
-        "data/feature_bc_libraries/{sample}_library.csv"
+        library     = "data/feature_bc_libraries/{sample}_library.csv",
+        library_arc = "data/feature_bc_libraries/{sample}_library_arc.csv",
     params:
-        library_types = get_library_type
-    shell:
-        """
-        echo "fastqs,sample,library_type" > {output}
-        echo "{params.library_types}" >> {output}
-        """
+        library_type    = config["cellranger_count"]["10x_pipeline"],
+        is_feature_bc   = is_feature_bc(),
+        is_cell_hashing = lambda w: is_cell_hashing(w.sample)
+    script:
+        "../scripts/python/create_library_csv.py"
 
 
 rule create_cellhashing_ref:

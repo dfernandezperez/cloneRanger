@@ -85,47 +85,6 @@ def is_cell_hashing(sample):
         return False
 
 
-def get_library_type(wildcards):
-    """Create the content of library.csv for the feature barcoding and multiome pipeline
-    from cellranger.
-    
-    Based on what is written in the column lib_type from the units file,
-    write the following: "fastq folder,fastq name,library type".
-    """
-    abs_path     = os.getcwd()
-    lib_type_col = set( units.loc[(wildcards.sample), "lib_type"] )
-    lib_types    = dict()
-
-    for lib_type in lib_type_col:
-        if lib_type == 'GEX':
-            lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Gene Expression'
-        elif lib_type == 'ATAC':
-            lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Chromatin Accessibility'
-        # Use and if statement for larry and cellhashing data, in case we want to analzye the libs
-        # without some of them despite having the larry/ch fastq files in units.tsv.  
-        elif lib_type == 'FB':
-            if not is_feature_bc():
-                next
-            else:
-                lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Custom'
-        elif lib_type == 'CH':
-            if not is_cell_hashing(wildcards.sample):
-                next
-            else:
-                lib_types[lib_type] = f'{abs_path}/data/clean,{wildcards.sample}_{lib_type},Antibody Capture'
-        else:
-            sys.exit("Library type must be GEX, FB, ATAC or CH.")
-
-    return '\n'.join(lib_types.values())
-
-
-def get_cellranger_mtx(wildcards):
-    if is_cell_hashing(wildcards.sample):
-        return "results/01_counts/{sample}/outs/multi/count/raw_feature_bc_matrix/"
-    else:
-        return "results/01_counts/{sample}/outs/per_sample_outs/"
-
-
 def get_seurat_rds(wildcards):
     if is_feature_bc():
         return expand("results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds", sample = SAMPLES)
@@ -156,6 +115,23 @@ def get_cellranger_input(wildcards):
             "libraries"   : "data/feature_bc_libraries/{sample}_library.csv"
         }
 
+def get_cellranger_output(wildcards):
+    if is_feature_bc() and config["cellranger_count"]["10x_pipeline"] == "ARC":
+        return {
+            "arc"   : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix",
+            "counts" : "results/01_counts/{sample}/outs/filtered_feature_bc_matrix"
+        }
+
+    elif not is_feature_bc() and config["cellranger_count"]["10x_pipeline"] == "ARC":
+        return {
+            "arc" : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix"
+        }
+
+    else:
+        return { 
+            "counts" : "results/01_counts/{sample}/outs/filtered_feature_bc_matrix" 
+        }
+        
 
 def get_feature_ref_input(wildcards):
     if is_feature_bc():

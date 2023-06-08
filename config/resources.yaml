@@ -29,5 +29,5 @@ merge_seurat:
     MaxMem: 100000
 
 barcode_filtering:
-    cpu : 5
+    cpu : 1
     MaxMem: 30000
