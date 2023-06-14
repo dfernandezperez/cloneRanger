@@ -112,24 +112,3 @@ rule RNA_exploration:
         "results/benchmarks/RNA_exploration/benchmark.txt"
     script:
         "../scripts/R/RNA_exploration.Rmd"
-
-
-rule barcode_exploration:
-    input:
-        "results/03_mergeSeurat/seurat_merged.rds"
-    output:
-        html = "results/05_barcode-exploration/barcode_exploration.html"
-    params:
-        barcodes = LARRY_COLORS
-    conda:
-         "../envs/Seurat.yaml"
-    threads:
-        RESOURCES["barcode_exploration"]["cpu"]
-    resources:
-        mem_mb = RESOURCES["barcode_exploration"]["MaxMem"]
-    log:
-        "results/00_logs/barcode_exploration/log"
-    benchmark:
-        "results/benchmarks/barcode_exploration/benchmark.txt"
-    script:
-        "../scripts/R/barcode_exploration.Rmd"

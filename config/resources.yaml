@@ -20,10 +20,6 @@ RNA_exploration:
     cpu   : 1
     MaxMem: 100000
 
-barcode_exploration:
-    cpu   : 1
-    MaxMem: 50000
-
 merge_seurat:
     cpu : 1
     MaxMem: 100000

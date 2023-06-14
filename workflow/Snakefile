@@ -63,8 +63,7 @@ for sample,lib_type in zip(units["sample_id"].values, units["lib_type"].values):
 if config["cellranger_count"]["10x_pipeline"] == "GEX" and is_feature_bc():
     target_files = [
         "results/04_RNA-exploration/RNA_exploration.html",
-        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES),
-        "results/05_barcode-exploration/barcode_exploration.html"
+        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES)
         ]
 
 elif config["cellranger_count"]["10x_pipeline"] in ["GEX", "ARC"] and not is_feature_bc():
@@ -73,8 +72,7 @@ elif config["cellranger_count"]["10x_pipeline"] in ["GEX", "ARC"] and not is_fea
 elif config["cellranger_count"]["10x_pipeline"] == "ARC" and is_feature_bc():
     target_files = [
         "results/04_RNA-exploration/RNA_exploration.html",
-        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES),
-        "results/05_barcode-exploration/barcode_exploration.html"
+        expand("results/05_barcode-exploration/{sample}_barcode-summary.html", sample = SAMPLES)
         ]
 
 elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
