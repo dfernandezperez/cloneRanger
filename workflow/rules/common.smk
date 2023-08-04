@@ -119,12 +119,16 @@ def get_cellranger_output(wildcards):
     if is_feature_bc() and config["cellranger_count"]["10x_pipeline"] == "ARC":
         return {
             "arc"   : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix",
-            "counts" : "results/01_counts/{sample}/outs/filtered_feature_bc_matrix"
+            "counts" : "results/01_counts/{sample}/outs/filtered_feature_bc_matrix",
+            "fragments" : "results/01_arc/{sample}/outs/atac_fragments.tsv.gz",
         }
 
     elif not is_feature_bc() and config["cellranger_count"]["10x_pipeline"] == "ARC":
         return {
-            "arc" : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix"
+            "arc" : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix",
+            "counts" : "results/01_arc/{sample}/outs/filtered_feature_bc_matrix", # repeat arc input just to have the count variable
+            "fragments" : "results/01_arc/{sample}/outs/atac_fragments.tsv.gz",
+
         }
 
     else:

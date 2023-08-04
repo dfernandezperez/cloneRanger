@@ -5,6 +5,7 @@ sink(log, type = "message")
 
 ### Libraries
 library(Seurat)
+library(Signac)
 library(tidyverse)
 library(SingleCellExperiment)
 library(scDblFinder)
@@ -54,7 +55,7 @@ create_seurat <- function(input_files, sample_name, cellhash_names, min_cells_ge
 }
 
 
-create_seurat_arc <- function(input_files, input_larry = NULL, sample_name, min_cells_gene = 1,
+create_seurat_arc <- function(input_files, input_fragments, input_larry = NULL, sample_name, min_cells_gene = 1,
                           is_larry = FALSE, UMI_cutoff = 0) {
   # Load files
   names(input_files) <- sample_name
@@ -71,13 +72,13 @@ create_seurat_arc <- function(input_files, input_larry = NULL, sample_name, min_
     )
 
     seurat            <- CreateSeuratObject(counts = arc$`Gene Expression`[,common_cells], min.cells = min_cells_gene)
-    seurat[["ATAC"]]  <- CreateAssayObject(counts = arc$`Peaks`[,common_cells])
+    seurat[["ATAC"]]  <- CreateChromatinAssay(counts = arc$`Peaks`[,common_cells], fragments = input_fragments, sep = c(":", "-"))
     seurat[["Larry"]] <- CreateAssayObject(counts = larry$Custom[,common_cells])
 
   } else {
 
     seurat           <- CreateSeuratObject(counts = arc$`Gene Expression`, min.cells = min_cells_gene)
-    seurat[["ATAC"]] <- CreateAssayObject(counts = arc$`Peaks`)
+    seurat[["ATAC"]] <- CreateChromatinAssay(counts = arc$`Peaks`, fragments = input_fragments, sep = c(":", "-"))
 
   }
   
@@ -99,6 +100,7 @@ create_seurat_arc <- function(input_files, input_larry = NULL, sample_name, min_
 # Remove cell doublets
 #-----------------------------------------------------------------------------------------------------------------------
 remove_doublets <- function(seurat, cores = 1) {
+  
   sce <- NormalizeData(seurat) %>% as.SingleCellExperiment()
   sce <- scDblFinder(sce, samples = "sample", BPPARAM = MulticoreParam(cores))
   
@@ -189,6 +191,7 @@ if (snakemake@params[["library_type"]] == "ARC") {
 
   seurat <- create_seurat_arc(
     input_files     = snakemake@input[["arc"]],
+    input_fragments = snakemake@input[["fragments"]],
     input_larry     = snakemake@input[["counts"]],
     sample_name     = snakemake@wildcards[["sample"]],
     min_cells_gene  = snakemake@params[["min_cells_gene"]],
