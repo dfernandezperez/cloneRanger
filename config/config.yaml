@@ -15,7 +15,7 @@ genome_refrerence_arc   : /stemcell/scratch/References/Cellranger/refdata-cellra
 # Cellranger count parameters
 cellranger_count:
   # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
-  10x_pipeline : "ARC"
+  10x_pipeline : "GEX"
   introns: True
   mem: 120
   extra_parameters_atac: "--nosecondary"
@@ -49,7 +49,7 @@ preprocessing:
     - Ncam2
     - Tgfbr3
     - Tcf15
-    - Nupr
+    - Nupr1
     - Rnf220
     - Clu
     - Tppp3

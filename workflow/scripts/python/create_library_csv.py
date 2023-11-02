@@ -26,17 +26,17 @@ if is_feature_bc:
 if is_cell_hashing:
     lib_csv['CH'] = f'{abs_path}/data/clean,{sample}_CH,Antibody Capture'
 
-elif lib_type == 'GEX':
+if lib_type == 'GEX':
     lib_csv['GEX'] = f'{abs_path}/data/clean,{sample}_GEX,Gene Expression'
 
-elif lib_type == 'ATAC':
+if lib_type == 'ATAC':
     lib_csv['ATAC'] = f'{abs_path}/data/clean,{sample}_ATAC,Chromatin Accessibility'
 
-elif lib_type == 'ARC' and not is_feature_bc:
+if lib_type == 'ARC' and not is_feature_bc:
     lib_csv['ATAC'] = f'{abs_path}/data/clean,{sample}_ATAC,Chromatin Accessibility'
     lib_csv['GEX']  = f'{abs_path}/data/clean,{sample}_GEX,Gene Expression'
     
-elif lib_type == 'ARC' and is_feature_bc:
+if lib_type == 'ARC' and is_feature_bc:
     lib_csv['GEX']  = f'{abs_path}/data/clean,{sample}_GEX,Gene Expression'
 
 # Save library dict to csv

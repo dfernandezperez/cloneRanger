@@ -5,6 +5,7 @@ channels:
 dependencies:
   - r-base=4.2.2
   - r-seurat=4.3.0
+  - r-signac=1.9.0
   - r-glue=1.6.2
   - r-tidyverse=2.0.0
   - bioconductor-scdblfinder=1.12.0
