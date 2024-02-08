@@ -29,19 +29,19 @@ Paths to raw data (fastq files) are located in the file `config/samples/units.ts
 
 * `lane`: The idea of this field is to group fastq files corresponding to the same sample (or to samples that have to be merged). For example, if 1 sample arrived in 2 different lanes from a PE experiment, in total there will be 4 fastqs (2 forward and 2 reverse). In this case, one should enter the same sample 2 times, putting in the `lane` field the corresponding lanes (lane1 and lane2, for example). Actually one can write any word in this field, the idea is to group fastqs from the same sample. All the entries with the same name in the `sample` field with different `lane` will be merged in the same fastq. Here an example of how it would be with 1 sample that arrived in 2 lanes:
 
-	| sample_id | lane | lib_type | R1 | R2 | R3 |
-	|-----------|------|----------|----|----|----|
-	| foo | lane1 | GEX | path/to/forward_lane1.fastq.gz | path/to/reverse_lane1.fastq.gz | |
-	| foo | lane2 | GEX | path/to/forward_lane2.fastq.gz | path/to/reverse_lane2.fastq.gz | |
+    | sample_id | lane | lib_type | R1 | R2 | R3 |
+    |-----------|------|----------|----|----|----|
+    | foo | lane1 | GEX | path/to/forward_lane1.fastq.gz | path/to/reverse_lane1.fastq.gz | |
+    | foo | lane2 | GEX | path/to/forward_lane2.fastq.gz | path/to/reverse_lane2.fastq.gz | |
 
-	Usually I use lane1 and lane2 for consistency and making things more clear, but the following would also work:
+    Usually I use lane1 and lane2 for consistency and making things more clear, but the following would also work:
 
-	| sample_id | lane | lib_type | R1 | R2 | R3 |
-	|-----------|------|----------|----|----|----|
-	| foo | whatever | GEX | path/to/forward_lane1.fastq.gz | path/to/reverse_lane1.fastq.gz | |
-	| foo | helloworld | GEX | path/to/forward_lane2.fastq.gz | path/to/reverse_lane2.fastq.gz | |
+    | sample_id | lane | lib_type | R1 | R2 | R3 |
+    |-----------|------|----------|----|----|----|
+    | foo | whatever | GEX | path/to/forward_lane1.fastq.gz | path/to/reverse_lane1.fastq.gz | |
+    | foo | helloworld | GEX | path/to/forward_lane2.fastq.gz | path/to/reverse_lane2.fastq.gz | |
 
-	The important thing is that if a sample is split in different pairs of fastq files (different pairs of R1 & R2 files) in the units file they must be inserted in 2 different rows, with the **same sample_id** and **different lane**.
+    The important thing is that if a sample is split in different pairs of fastq files (different pairs of R1 & R2 files) in the units file they must be inserted in 2 different rows, with the **same sample_id** and **different lane**.
 
 * `lib_type`: corresponds to the type of library. Basically it can be one of 3: **GEX** (Gene expression), **ATAC** (Chromatin accessibility), **FB** (Feature barcoding, which has to be set for the LARRY fastqs) and **CH** (Fast files containing cellhashing data).
 
@@ -74,11 +74,11 @@ Inside the file, and also in the file `workflow/schema/config.schema.yaml` you c
 * `umi_cutoff`: Number of UMIs required to consider a LARRY barcode deteced in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. Default: `3`
 * `bc_patterns`: The patterns of the larry barcodes integrated in the sequenced cells. **IMPORTANT**: Right now the pipeline **DOES NOT** allow to use underscores (`_`) in the larry barcode name (Sapphire, GFP, etc...). It has the following structure:
 
-	```yaml
-	bc_patterns:
-		"TGATTG....TG....CA....GT....AG...." : "Sapphire"
-		"TCCAGT....TG....CA....GT....AG...." : "GFP"
-	```
+    ```yaml
+    bc_patterns:
+        "TGATTG....TG....CA....GT....AG...." : "Sapphire"
+        "TCCAGT....TG....CA....GT....AG...." : "GFP"
+    ```
 
 ## Cellhashing configuration
 
@@ -86,10 +86,10 @@ Inside the file, and also in the file `workflow/schema/config.schema.yaml` you c
 
 ```yaml
 barcodes:
-	TotalSeqMouse1: ["R2", "5PNNNNNNNNNN(BC)", "ACCCACCAGTAAGAC"]
-	TotalSeqMouse2: ["R2", "5PNNNNNNNNNN(BC)", "GGTCGAGAGCATTCA"]
-	TotalSeqMouse3: ["R2", "5PNNNNNNNNNN(BC)", "CTTGCCGCATGTCAT"]
-	TotalSeqMouse4: ["R2", "5PNNNNNNNNNN(BC)", "AAAGCATTCTTCACG"]
+    TotalSeqMouse1: ["R2", "5PNNNNNNNNNN(BC)", "ACCCACCAGTAAGAC"]
+    TotalSeqMouse2: ["R2", "5PNNNNNNNNNN(BC)", "GGTCGAGAGCATTCA"]
+    TotalSeqMouse3: ["R2", "5PNNNNNNNNNN(BC)", "CTTGCCGCATGTCAT"]
+    TotalSeqMouse4: ["R2", "5PNNNNNNNNNN(BC)", "AAAGCATTCTTCACG"]
 ```
 
 Basically you have to write the name of the totalseq Ab, in which read it is present, the pattern to locate the barcod in the read, and the sequence. This uses the syntax described by 10XGenomics in their [website](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/running-pipelines/cr-feature-bc-analysis). By default you can find the standard totalseqmouse Abs and their sequences.
