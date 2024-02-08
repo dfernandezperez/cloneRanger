@@ -154,7 +154,8 @@ def get_feature_ref_input(wildcards):
             }
 
     else:
-        # If no larry/cellhashing is performed, this file has
+        # Reference file is just required for larry or cellhashing.
+        # If there's no larry but still this rule is executed, it will always be cellhashing.
         return {
             "cell_hash_ref" : "data/cellhashing/cellhashing-reference_{sample}.csv"
         }
