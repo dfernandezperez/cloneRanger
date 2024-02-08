@@ -17,7 +17,7 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX":
             n_cells     = get_expected_cells,
             genome      = config["genome_reference_gex"],
             extra_p     = config["cellranger_count"]["extra_parameters_rna"],
-            mem_gb      = config["cellranger_count"]["mem"],
+            mem_gb      = round(int(RESOURCES["cellranger_count"]["MaxMem"])/1000),
             feature_ref = get_feature_ref
         log:
             "results/00_logs/counts/{sample}.log",

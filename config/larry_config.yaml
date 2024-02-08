@@ -10,6 +10,7 @@ reads_cutoff: 10
 umi_cutoff: 3
 # Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
 # Special characters won't be escaped.  
+# IMPORTANT!!! --> LARRY BARCODE NAMES CAN'T HAVE UNDERSCORES ('_') IN THEIR NAMES (can have other characters)
 bc_patterns:
   "TGATTG....TG....CA....GT....AG...." : "Sapphire"
   "TCCAGT....TG....CA....GT....AG...." : "GFP"

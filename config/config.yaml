@@ -17,7 +17,6 @@ cellranger_count:
   # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
   10x_pipeline : "GEX"
   introns: True
-  mem: 120
   extra_parameters_atac: "--nosecondary"
   extra_parameters_rna: "--nosecondary"
   extra_parameters_arc: ""

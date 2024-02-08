@@ -5,7 +5,7 @@ import sys
 # wildcard constraints to be sure that output names are defined properly
 wildcard_constraints:
     # hamming distance can just be a value
-    hd="\d+" ,
+    hd=r"\d+",
     # reads corresponding to cellular barcode and feature barcode can only be R1 or R2
     read_fb="R[12]",
     read_cb="R[12]",
