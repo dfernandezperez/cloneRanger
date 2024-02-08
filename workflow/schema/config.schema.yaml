@@ -5,17 +5,6 @@ description: Snakemake configuration file
 type: object
 
 properties:
-  units:
-    type: string
-    
-  resources:
-    type: string
-
-  sample_config:
-    type: string
-  
-  cell_hashing:
-    type: string
 
   cellranger_rna_sif:
     description: Singularity image to execute cellranger count (RNA)
@@ -44,21 +33,32 @@ properties:
       introns     : { type: boolean }
       mem         : { type: integer }
 
-  feature_bc_config:
-    type: object
-    properties:
-      feature_bc      : { type: boolean, description: "Is there feature barcoding data?" }
-      read_feature_bc : { type: string, enum: ["R1", "R2"], description: "Read in which larry barcode is present" }
-      read_cellular_bc: { type: string, enum: ["R1", "R2"], description: "Read in which cellular barcode is present"  }
-      hamming_distance: { type: integer }
-      reads_cutoff    : { type: integer }
-      umi_cutoff      : { type: integer }
-      bc_patterns     : { type: object }
-
   preprocessing:
     type: object
+    description: parameters to run Seurat. Minimum cells per gene, species, patterns to select mithocondrial and ribosomal genes (adapt based on species) and markers genes to plot in report
     properties:
       min_cells: { type: integer, minimum: 0, description: "Minimum number of cells that must express a feature."}
-      species  : { type: string, enum: [human, mouse], description: Sample species }
+      species  : { type: string, enum: [human, mouse], description: Sample species. Can be mouse or human }
+      mito_pattern: { type: string, description: Pattern to select mithocondrial genes. ^mt- for mouse, ^MT- for humans }
+      ribo_pattern: { type: string, description: Pattern to select ribosomal genes. Rpl|^Rps for mouse, RPL|^RPS for humans }
+      marker_genes: { type: array, description: Genes that will be plotted in the final Rmarkdown report. Use a syntax corresponding to your species }
+  
+  units:
+    type: string
+    description: path to units.tsv file containing fastq paths and sample names
+    
+  resources:
+    type: string
+    description: path to resources.yaml file containing resources used by each rule
 
-      n_cells     : { oneOf: [ { type: integer },  { type: string, enum: ["auto"] } ] }
+  sample_config:
+    type: string
+    description: path to sample_config.tsv containing cellfiltering parameters for cellranger and Seurat
+  
+  cell_hashing:
+    type: string
+    description: path to cell_hashing.yaml containing the mapping of totalseq antibodies to subsample names
+
+  larry_config:
+    type: string
+    description: path to larry_config.yaml containing the configuration to process LARRY barcodes
