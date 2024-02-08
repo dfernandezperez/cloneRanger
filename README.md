@@ -143,5 +143,5 @@ is equivalent to
 If you want to add extra snakemake parameters without modifying `config/snakemake_profile/config.yaml`:
 
 ```bash
-./execute_pipeline.sh --rerun-triger mtime
+./execute_pipeline.sh --rerun-triggers mtime
 ```
