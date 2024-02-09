@@ -155,6 +155,7 @@ summary_cellhashing <- function(seurat, cellhash_names) {
   Idents(seurat) <- "Cellhashing_classification"
   p1 <- RidgePlot(seurat, assay = "Cellhashing", features = rownames(seurat[["Cellhashing"]]), ncol = 1)
   p2 <- VlnPlot(seurat, features = "nCount_RNA", pt.size = 0.1, log = TRUE)
+  
   Idents(seurat) <- "subsample"
   p3 <- RidgePlot(seurat, assay = "Cellhashing", features = rownames(seurat[["Cellhashing"]]), ncol = 1)
   p4 <- VlnPlot(seurat, features = "nCount_RNA", pt.size = 0.1, log = TRUE)
@@ -168,7 +169,7 @@ summary_cellhashing <- function(seurat, cellhash_names) {
   # First with emprydrops annotation, then with seurat annotation
   ab_combs <- snakemake@params[["cellhash_names"]] %>% names() %>% combn(2)
   
-  for (i in ncol(ab_combs)) {
+  for (i in 1:ncol(ab_combs)) {
     comb <- ab_combs[,i]
     p <- FeatureScatter(seurat, feature1 = comb[1], feature2 = comb[2], raster = TRUE)
     print(p)
@@ -240,7 +241,7 @@ if (snakemake@params[["is_cell_hashing"]]) {
     sample_name    = snakemake@wildcards[["sample"]]
   )
   
-  pdf(paste0("results/02_createSeurat/", snakemake@wildcards[["sample"]], "_cellhash.pdf"), width = 7.5, height = 5)
+  pdf(paste0("results/02_createSeurat/", snakemake@wildcards[["sample"]], "_cellhash.pdf"), width = 8, height = 8)
   summary_cellhashing(seurat_clean, snakemake@params[["cellhash_names"]])
   dev.off()
   
