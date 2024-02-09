@@ -64,7 +64,7 @@ Example of a units.tsv file with GEX, LARRY and Cellhashing:
 | sample_id | lane | lib_type | R1 | R2 | R3 |
 |-----------|------|----------|----|----|----|
 | sample1 | lane1 | GEX | path/to/forward_GEX_lane1.fastq.gz | path/to/reverse_GEX_lane1.fastq.gz | |
-| sample1 | lane2 | GEX | path/to/forward_lGEX_ane2.fastq.gz | path/to/reverse_GEX_lane2.fastq.gz | |
+| sample1 | lane2 | GEX | path/to/forward_GEX_lane2.fastq.gz | path/to/reverse_GEX_lane2.fastq.gz | |
 | sample1 | lane1 | FB | path/to/forward_LARRY_lane1.fastq.gz | path/to/reverse_LARRY_lane1.fastq.gz | |
 | sample1 | lane1 | CH | path/to/forward_cellhashing_lane2.fastq.gz | path/to/reverse_cellhashing_lane2.fastq.gz | |
 
