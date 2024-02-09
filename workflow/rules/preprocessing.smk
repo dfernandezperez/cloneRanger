@@ -27,27 +27,6 @@ rule create_seurat:
         "../scripts/R/create_seurat.R"
 
 
-rule barcode_summary:
-    input:
-        "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
-    output:
-        html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
-    params:
-        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
-    conda:
-         "../envs/Seurat.yaml"
-    threads:
-        RESOURCES["barcode_filtering"]["cpu"]
-    resources:
-        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
-    log:
-        "results/00_logs/barcode_filtering/{sample}.log"
-    benchmark:
-        "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
-    script:
-        "../scripts/R/barcode_summary.Rmd"
-
-
 rule barcode_filtering:
     input:
         "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
@@ -69,6 +48,27 @@ rule barcode_filtering:
         "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
     script:
         "../scripts/R/barcode_filtering.R"
+
+
+rule barcode_summary:
+    input:
+       "results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds"
+    output:
+        html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
+    params:
+        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
+    conda:
+         "../envs/Seurat.yaml"
+    threads:
+        RESOURCES["barcode_filtering"]["cpu"]
+    resources:
+        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+    log:
+        "results/00_logs/barcode_filtering/{sample}.log"
+    benchmark:
+        "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
+    script:
+        "../scripts/R/barcode_summary.Rmd"
 
 
 rule merge_seurat:

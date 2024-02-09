@@ -14,7 +14,7 @@ A Snakemake workflow to process single-cell libraries generated with 10XGenomics
 * `results/04_RNA-exploration`: Small summary of how the data looks like. UMAP plots, clustering, mithocondrial and ribosomal expression, marker genes by cluster and by sample.
 * `results/05_barcode-exploration`: A very brief html report to check the expression and detection of LARRY barcodes in every sample. Very useful to determine the UMI cutoff used to consider a LARRY barcoded as detected or not.
 
-**IMPORTANT**: To run this pipeline you need to have [snakemake](https://snakemake.github.io) installed. You can follow their [tutorial](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) for installing the software, it is very straightfoward. Also, to run the pipeline some [singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) containers for cellranger are also required. You can read more about this in the [cellranger parameters](#configuration-of-pipeline-parameters-cellranger) section.
+**IMPORTANT**: To run this pipeline you need to have [snakemake](https://snakemake.github.io) installed. You can follow their [tutorial](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) for installing the software, it is very straightforward. Also, to run the pipeline some [singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) containers for cellranger are also required. You can read more about this in the [cellranger parameters](#configuration-of-pipeline-parameters-cellranger) section.
 
 
 
@@ -37,7 +37,7 @@ Paths to raw data (fastq files) are located in the file `config/samples/units.ts
 |-----------|------|----------|----|----|----|
 | name_of_sample | name_of_lane_or_resequencing | library type | path/to/forward.fastq.gz | path/to/reverse.fastq.gz | path/to/ATAC-R3.fastq.gz
 
-* `sample_id`: The first field correspond to the sample name. This field has to be identical for all the fastqs corresponding to the same sample, idependently of the library type of the fastq. If a sample is split in 2 different library types (such as ATAC + RNA or RNA and LARRY), both of them must have the same sample_id.
+* `sample_id`: The first field correspond to the sample name. This field has to be identical for all the fastqs corresponding to the same sample, independently of the library type of the fastq. If a sample is split in 2 different library types (such as ATAC + RNA or RNA and LARRY), both of them must have the same sample_id.
 
 * `lane`: The idea of this field is to group fastq files corresponding to the same sample (or to samples that have to be merged). For example, if 1 sample arrived in 2 different lanes from a PE experiment, in total there will be 4 fastqs (2 forward and 2 reverse). In this case, one should enter the same sample 2 times, putting in the `lane` field the corresponding lanes (lane1 and lane2, for example). Actually one can write any word in this field, the idea is to group fastqs from the same sample. All the entries with the same name in the `sample` field with different `lane` will be merged in the same fastq. Here an example of how it would be with 1 sample that arrived in 2 lanes:
 
@@ -72,7 +72,7 @@ Example of a units.tsv file with GEX, LARRY and Cellhashing:
 
 Cellranger parameters can be configured in `config/config.yaml`. Modify them as you wish. Check always that you are using the correct genome files corresponding to the version that you want to use. 
 
-Inside the file, and also in the file `workflow/schema/config.schema.yaml` you can find what is controled by each tunable parameter.
+Inside the file, and also in the file `workflow/schema/config.schema.yaml` you can find what is controlled by each tunable parameter.
 
 Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. You can build your own images to download mine with the following commands:
 
@@ -92,8 +92,8 @@ Then just add the path of those files to `config/config.yaml` in their correspon
 * `read_feature_bc`: In which fastq (fw or rv) are located larry barcodes. Usually is the `R2`.
 * `read_cellular_bc`: In which fastq (fw or rv) are located cellular barcodes. Usually is the `R2`. This is the opposite fastq than `read_feature_bc`.
 * `hamming_distance`: The hamming distance that will be used to collapse larry barcodes. We have seen that for a barcode of 20 nucleotides in length, `3` or `4` are good values. 
-* `reads_cutoff`: Number of minimum reads that a molecule needs to have in oprder to consider a UMI. Cellranger considers any molecule sequenced at least 1 time as a valid UMI. Since usually we sequence LARRY libraries at >90% saturation, most molecules should be sequenced way more than 1 time (we are sequencing many PCR duplicates). Setting this threshold `between 5 and 10` has helped us to reduce the number of false positive larry assignments in our datasets.
-* `umi_cutoff`: Number of UMIs required to consider a LARRY barcode deteced in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. This can be easily re-executed by the user in R after running the pipeline. Default: `3`
+* `reads_cutoff`: Number of minimum reads that a molecule needs to have in order to consider a UMI. Cellranger considers any molecule sequenced at least 1 time as a valid UMI. Since usually we sequence LARRY libraries at >90% saturation, most molecules should be sequenced way more than 1 time (we are sequencing many PCR duplicates). Setting this threshold `between 5 and 10` has helped us to reduce the number of false positive larry assignments in our datasets.
+* `umi_cutoff`: Number of UMIs required to consider a LARRY barcode detected in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. This can be easily re-executed by the user in R after running the pipeline. Default: `3`
 * `bc_patterns`: The patterns of the larry barcodes integrated in the sequenced cells. **IMPORTANT**: Right now the pipeline **DOES NOT** allow to use underscores (`_`) in the larry barcode name (Sapphire, GFP, etc...). It has the following structure:
 
     ```yaml
@@ -117,9 +117,9 @@ barcodes:
     TotalSeqMouse4: ["R2", "5PNNNNNNNNNN(BC)", "AAAGCATTCTTCACG"]
 ```
 
-Basically you have to write the name of the totalseq Ab, in which read it is present, the pattern to locate the barcod in the read, and the sequence. This uses the syntax described by 10XGenomics in their [website](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/running-pipelines/cr-feature-bc-analysis). By default you can find the standard totalseqmouse Abs and their sequences.
+Basically you have to write the name of the totalseq Ab, in which read it is present, the pattern to locate the barcode in the read, and the sequence. This uses the syntax described by 10XGenomics in their [website](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/running-pipelines/cr-feature-bc-analysis). By default you can find the standard totalseqmouse Abs and their sequences.
 
-Then, you have to fill to which sample corresopnds every Ab and the subsample names:
+Then, you have to fill to which sample corresponds every Ab and the subsample names:
 
 ```yaml
 assignments:
@@ -139,7 +139,7 @@ assignments:
 
 ## Snakemake profiles
 
-In Snakemake 4.1 [snakemake profiles](https://github.com/Snakemake-Profiles) were introduced. They are supposed to substitute the classic cluster.json file and make the execution of snakemake more simple. The parameters that will be passed to snakemake (i.e: --cluster, --use-singularity...) now are inside a yaml file (`config.yaml`) inside the profile folder (in the case of this repository is `config/snakemake_profile`). The `config.yaml` inside `snakemake_profile` contains the parameters passed to snakemake. An important parameters that you have to adapt are:
+In Snakemake 4.1 [snakemake profiles](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles) were introduced. They are supposed to substitute the classic cluster.json file and make the execution of snakemake more simple. The parameters that will be passed to snakemake (i.e: --cluster, --use-singularity...) now are inside a yaml file (`config.yaml`) inside the profile folder (in the case of this repository is `config/snakemake_profile`). The `config.yaml` inside `snakemake_profile` contains the parameters passed to snakemake. An important parameters that you have to adapt are:
 
 ```yaml
 cores            : 120 # Define total amount of cores that the pipeline can use

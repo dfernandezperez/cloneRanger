@@ -36,6 +36,7 @@ sink(log, type = "message")
 
 ```{r libraries}
 library(Seurat)
+library(glue)
 library(tidyverse)
 library(DropletUtils)
 source("workflow/scripts/R/functions.R")
@@ -58,7 +59,6 @@ get_larry_molinfo <- function(molinfo) {
 }
 
 efficiency_and_integrations_by_threshold <- function(seurat, slot = "data", larry_assay = "Larry", thresholds = seq(0, 10, 0.1)) {
-  require(tidyverse)
 
   m <- as(GetAssayData(object = seurat, slot = slot, assay = larry_assay), "dgTMatrix")
   n_cells <- length(Cells(seurat))
@@ -72,10 +72,10 @@ efficiency_and_integrations_by_threshold <- function(seurat, slot = "data", larr
   df <- map_df(
     thresholds,
     \(x) df_bcs %>%
-      filter(norm_umi >= x) %>%
+      dplyr::filter(norm_umi >= x) %>%
       group_by(color) %>%
-      count(cells) %>%
-      summarise(
+      dplyr::count(cells) %>%
+      dplyr::summarise(
         threshold = x,
         cells_bc = n() / n_cells,
         cells_multiple_bc = sum(n > 1) / n_cells
@@ -143,15 +143,14 @@ for (i in unique(seurat$sample)) {
   
   print(glue("Plotting sample {i}:"))
   
-  p <- efficiency_and_integrations_by_threshold(tmp, slot = "counts", larry_assay = "Larry_filt", thresholds = seq(1, 10, 1)) %>%
+  p <- efficiency_and_integrations_by_threshold(tmp, slot = "data", larry_assay = "Larry_filt", thresholds = seq(1, 10, 1)) %>%
     ggplot(aes(x = threshold, y = value, color = name)) +
     geom_line() +
     geom_point() +
     facet_wrap(~color, scales = "free_y") +
-    theme.2 +
+    theme_bw() +
     labs(x = "UMI threshold", y = "Proportion of cells") +
     scale_color_brewer(palette = "Dark2") +
-    # geom_vline(xintercept = 7.5, linetype = "dashed") +
     theme(legend.position = "bottom")
   
   print(p)
@@ -170,15 +169,14 @@ for (i in unique(seurat$subsample)) {
   
   print(glue("Plotting sample {i}:"))
   
-  p <- efficiency_and_integrations_by_threshold(tmp, slot = "counts", larry_assay = "Larry_filt", thresholds = seq(1, 10, 1)) %>%
+  p <- efficiency_and_integrations_by_threshold(tmp, slot = "data", larry_assay = "Larry_filt", thresholds = seq(1, 10, 1)) %>%
     ggplot(aes(x = threshold, y = value, color = name)) +
     geom_line() +
     geom_point() +
     facet_wrap(~color, scales = "free_y") +
-    theme.2 +
+    theme_bw() +
     labs(x = "UMI threshold", y = "Proportion of cells") +
     scale_color_brewer(palette = "Dark2") +
-    # geom_vline(xintercept = 7.5, linetype = "dashed") +
     theme(legend.position = "bottom")
   
   print(p)
