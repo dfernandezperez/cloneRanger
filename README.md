@@ -1,10 +1,13 @@
-# Snakemake workflow: `10X single-cell + LARRY`
+# Snakemake workflow: `10X GEX/ATAC + LARRY`
 
-[![Snakemake](https://img.shields.io/badge/snakemake-≥7.17.1-brightgreen.svg)](https://snakemake.github.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.4.7-brightgreen.svg)](https://snakemake.github.io)
 
 
 A Snakemake workflow to process single-cell libraries generated with 10XGenomics platform (RNA, ATAC and RNA+ATAC) together with [LARRY barcoding](https://www.nature.com/articles/s41586-020-2503-6). The pipeline uses cellranger to generate the single cell matrices to import into R/Python.
 
+**IMPORTANT**: To run this pipeline you need to have [snakemake](https://snakemake.github.io) installed. You can follow their [tutorial](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) for installing the software, it is very straightfoward. 
+
+To run the pipeline some singularity images for cellranger are also required. You can read more about this in the [cellranger parameters](#configuration-of-pipeline-parameters-cellranger) section.
 
 ## Configuration files
 
@@ -62,6 +65,16 @@ Cellranger parameters can be configured in `config/config.yaml`. Modify them as 
 
 Inside the file, and also in the file `workflow/schema/config.schema.yaml` you can find what is controled by each tunable parameter.
 
+Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. You can build your own images to download mine with the following commands:
+
+```bash
+singularity pull docker://dfernand/cellranger:7.1.0 # for GEX
+singularity pull docker://dfernand/cellranger_arc:2.0.2 # for GEX+ATAC
+singularity pull docker://dfernand/cellranger_atac:2.1.0 # for ATAC
+```
+
+Then just add the path of those files to `config/config.yaml` in their corresponding fields. For the genome annotation files, you can download them directly form [10XGenomics website](https://www.10xgenomics.com/).
+
 ## LARRY configuration
 
 `config/larry_config.yaml` contains the parameters of LARRY processing:
@@ -69,9 +82,9 @@ Inside the file, and also in the file `workflow/schema/config.schema.yaml` you c
 * `feature_bc`: Does data contain barcodes? set `True` or `False`
 * `read_feature_bc`: In which fastq (fw or rv) are located larry barcodes. Usually is the `R2`.
 * `read_cellular_bc`: In which fastq (fw or rv) are located cellular barcodes. Usually is the `R2`. This is the opposite fastq than `read_feature_bc`.
-* `hamming_distance`: The hamming distance that will be used to collapse larry barcodes. We have seen that for a barcode of 20 nucleotides in length, `4` is a good number. 
+* `hamming_distance`: The hamming distance that will be used to collapse larry barcodes. We have seen that for a barcode of 20 nucleotides in length, `3` or `4` are good values. 
 * `reads_cutoff`: Number of minimum reads that a molecule needs to have in oprder to consider a UMI. Cellranger considers any molecule sequenced at least 1 time as a valid UMI. Since usually we sequence LARRY libraries at >90% saturation, most molecules should be sequenced way more than 1 time (we are sequencing many PCR duplicates). Setting this threshold `between 5 and 10` has helped us to reduce the number of false positive larry assignments in our datasets.
-* `umi_cutoff`: Number of UMIs required to consider a LARRY barcode deteced in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. Default: `3`
+* `umi_cutoff`: Number of UMIs required to consider a LARRY barcode deteced in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. This can be easily re-executed by the user in R after running the pipeline. Default: `3`
 * `bc_patterns`: The patterns of the larry barcodes integrated in the sequenced cells. **IMPORTANT**: Right now the pipeline **DOES NOT** allow to use underscores (`_`) in the larry barcode name (Sapphire, GFP, etc...). It has the following structure:
 
     ```yaml
@@ -82,7 +95,10 @@ Inside the file, and also in the file `workflow/schema/config.schema.yaml` you c
 
 ## Cellhashing configuration
 
-`config/cellhashing_config.yaml` contains the parameters to process cellhashing data. You don't need to modify this file if cellhashing has not been used for library preparation. First you have to fill the sequences corresponding to the cellhashing antibodies, which has the following structure:
+**How cellhashing data is processed:**
+Cellhashing processing is performed using the function `hashedDrops` from the [DropletUtils package](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) with default parameters. `HTODemux` from [Seurat](https://satijalab.org/seurat/) is also performed and stored in the corresponding SeuratObject, but is not used for demultiplexing. If you desire to modify this behavior/settings, you can edit the script `workflow/scripts/R/create_seurat.R`. Also, since the cellhashing matrices are stored in the output SeuratObject, cellhashing can be re-processed again by the user. 
+
+**Cellhashing configuration files**: `config/cellhashing_config.yaml` contains the parameters to process cellhashing data. You don't need to modify this file if cellhashing has not been used for library preparation. First you have to fill the sequences corresponding to the cellhashing antibodies, which has the following structure:
 
 ```yaml
 barcodes:
