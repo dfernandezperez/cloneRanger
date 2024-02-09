@@ -72,8 +72,8 @@ rule move_gex_fq:
         fw = "data/lane_merged/{sample}_GEX_S1_L001_R1_001.fastq.gz",
         rv = "data/lane_merged/{sample}_GEX_S1_L001_R2_001.fastq.gz"
     output:
-        fw = "data/clean/{sample}_GEX_S1_L001_R1_001.fastq.gz",
-        rv = "data/clean/{sample}_GEX_S1_L001_R2_001.fastq.gz"
+        fw = temp("data/clean/{sample}_GEX_S1_L001_R1_001.fastq.gz"),
+        rv = temp("data/clean/{sample}_GEX_S1_L001_R2_001.fastq.gz")
     container:
         None
     shell:
@@ -89,8 +89,8 @@ rule move_cellhash_fq:
         fw = "data/lane_merged/{sample}_CH_S1_L001_R1_001.fastq.gz",
         rv = "data/lane_merged/{sample}_CH_S1_L001_R2_001.fastq.gz"
     output:
-        fw = "data/clean/{sample}_CH_S1_L001_R1_001.fastq.gz",
-        rv = "data/clean/{sample}_CH_S1_L001_R2_001.fastq.gz"
+        fw = temp("data/clean/{sample}_CH_S1_L001_R1_001.fastq.gz"),
+        rv = temp("data/clean/{sample}_CH_S1_L001_R2_001.fastq.gz")
     container:
         None
     shell:
@@ -107,9 +107,9 @@ rule move_atac_fq:
         rv = "data/lane_merged/{sample}_ATAC_S1_L001_R2_001.fastq.gz",
         r3 = "data/lane_merged/{sample}_ATAC_S1_L001_R3_001.fastq.gz"
     output:
-        fw = "data/clean/{sample}_ATAC_S1_L001_R1_001.fastq.gz",
-        rv = "data/clean/{sample}_ATAC_S1_L001_R2_001.fastq.gz",
-        r3 = "data/clean/{sample}_ATAC_S1_L001_R3_001.fastq.gz"
+        fw = temp("data/clean/{sample}_ATAC_S1_L001_R1_001.fastq.gz"),
+        rv = temp("data/clean/{sample}_ATAC_S1_L001_R2_001.fastq.gz"),
+        r3 = temp("data/clean/{sample}_ATAC_S1_L001_R3_001.fastq.gz")
     container:
         None
     shell:
@@ -121,8 +121,6 @@ rule move_atac_fq:
 
 
 rule create_library:
-    input:
-        expand("data/clean/{{sample}}_{lib_type}_S1_L001_{read}_001.fastq.gz", lib_type = LIB_TYPES, read = ["R1", "R2"]),
     output:
         library     = "data/feature_bc_libraries/{sample}_library.csv",
         library_arc = "data/feature_bc_libraries/{sample}_library_arc.csv",

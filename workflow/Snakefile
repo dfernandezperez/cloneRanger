@@ -1,6 +1,9 @@
 import pandas as pd
 import yaml
 from snakemake.utils import validate
+from snakemake.utils import min_version
+
+min_version("8.4.7") # Set minimum snakemake version to run the pipeline
 
 configfile: "config/config.yaml"
 container : "docker://condaforge/mambaforge:4.10.3-6"

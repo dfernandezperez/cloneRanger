@@ -70,7 +70,7 @@ rule merge_corrected_fastq:
             hd          = LARRY["hamming_distance"]
         )
     output:
-        "data/clean/{sample}_FB_S1_L001_{read_fb}_001.fastq.gz"
+        temp("data/clean/{sample}_FB_S1_L001_{read_fb}_001.fastq.gz")
     log:
         "results/00_logs/merge_corrected_fastq/{sample}_{read_fb}.log"
     benchmark:

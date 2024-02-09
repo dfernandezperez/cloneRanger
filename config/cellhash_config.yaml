@@ -22,3 +22,7 @@ barcodes:
   #   TotalSeqMouse1: "No-MS5-HSC-rep1"
   #   TotalSeqMouse3: "No-MS5-HSC-rep2"
 assignments:
+  D14-W1:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
