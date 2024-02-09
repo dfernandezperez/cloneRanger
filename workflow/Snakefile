@@ -36,7 +36,6 @@ validate(LARRY, schema = "schema/larry_config.schema.yaml")
 sample_config = sample_config.to_dict()
 SAMPLES       = set(units["sample_id"])
 LARRY_COLORS  = [color for color in LARRY["bc_patterns"].values()] if LARRY["feature_bc"] else None
-LIB_TYPES     = set(units["lib_type"])
 
 
 #-----------------------------------------------------------------------------------------------------------------------

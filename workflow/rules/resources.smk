@@ -36,8 +36,8 @@ rule merge_lanes:
             sample=units.loc[(w.sample, w.lib_type)].itertuples()
             )
     output:
-        fw = "data/lane_merged/{sample}_{lib_type}_S1_L001_R1_001.fastq.gz",
-        rv = "data/lane_merged/{sample}_{lib_type}_S1_L001_R2_001.fastq.gz"
+        fw = temp("data/lane_merged/{sample}_{lib_type}_S1_L001_R1_001.fastq.gz"),
+        rv = temp("data/lane_merged/{sample}_{lib_type}_S1_L001_R2_001.fastq.gz")
     log:
         "results/00_logs/merge_lanes/{sample}_{lib_type}.log"
     container:
@@ -55,7 +55,7 @@ rule merge_lanes_atac:
             sample=units.loc[(w.sample, w.lib_type)].itertuples()
             )
     output:
-        "data/lane_merged/{sample}_{lib_type}_S1_L001_R3_001.fastq.gz"
+        temp("data/lane_merged/{sample}_{lib_type}_S1_L001_R3_001.fastq.gz")
     log:
         "results/00_logs/merge_lanes_atac/{sample}_{lib_type}.log"
     container:

@@ -138,7 +138,7 @@ in_tabs(l, level = 1L)
 
 # Expression of specific genes {.tabset .tabset-fade}
 
-```{r marker-genes, results='asis', fig.width = 7.5, fig.height = 5.5}
+```{r marker-genes, results='asis', fig.width = 6, fig.height = 4.5}
 detected_genes <- GetAssayData(object = seurat, slot = "data") %>% rownames()
 
 plots <- map(
