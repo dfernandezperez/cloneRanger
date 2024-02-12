@@ -74,7 +74,7 @@ Cellranger parameters can be configured in `config/config.yaml`. Modify them as 
 
 Inside the file, and also in the file `workflow/schema/config.schema.yaml` you can find what is controlled by each tunable parameter.
 
-Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. You can build your own images to download mine with the following commands:
+Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. You can build your own images or download mine with the following commands:
 
 ```bash
 singularity pull docker://dfernand/cellranger:7.1.0 # for GEX
