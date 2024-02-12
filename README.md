@@ -2,8 +2,12 @@
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥8.4.7-brightgreen.svg)](https://snakemake.github.io)
 
-
 A Snakemake workflow to process single-cell libraries generated with 10XGenomics platform (RNA, ATAC and RNA+ATAC) together with [LARRY barcoding](https://www.nature.com/articles/s41586-020-2503-6). The pipeline uses cellranger to generate the single cell matrices to import into R/Python. 
+
+## Software requirements
+
+**IMPORTANT**: To run this pipeline you must have [snakemake](https://snakemake.github.io) installed. You can follow their [tutorial](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) for installing the software. Also, to run the pipeline some [singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) containers for cellranger are also required. You can read more about this in the [cellranger parameters](#configuration-of-pipeline-parameters-cellranger) section.
+
 
 ## Main output
 
@@ -14,16 +18,13 @@ A Snakemake workflow to process single-cell libraries generated with 10XGenomics
 * `results/04_RNA-exploration`: Small summary of how the data looks like. UMAP plots, clustering, mitochondrial and ribosomal expression, marker genes by cluster and by sample.
 * `results/05_barcode-exploration`: A very brief html report to check the expression and detection of LARRY barcodes in every sample. Very useful to determine the UMI cutoff used to consider a LARRY barcoded as detected or not.
 
-**IMPORTANT**: To run this pipeline you need to have [snakemake](https://snakemake.github.io) installed. You can follow their [tutorial](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) for installing the software, it is very straightforward. Also, to run the pipeline some [singularity](https://docs.sylabs.io/guides/3.5/user-guide/introduction.html) containers for cellranger are also required. You can read more about this in the [cellranger parameters](#configuration-of-pipeline-parameters-cellranger) section.
-
-
 
 ## Configuration files
 
 To setup the pipeline for execution it is very simple, however there are some files in the folder `config` that need to be modified/adapted. These are the main configuration files and their contents:
 
 * `config/samples/units.tsv`: Sample name information and paths to fastq files (see [units and sample_config](#samples-to-process-and-raw-data) section).
-* `config/samples/sample_config.tsv`: Sample name information, UMI cutoff and forced number of cells.
+* `config/samples/sample_config.tsv`: Sample name information, UMI cutoff and forced number of cells. If you don't want to apply direct UMI filtering in cellranger, set this value to `0`, if you neither want to force the number of detected cells (99.9% of the time) set this value to `auto`.
 * `config/config.yaml`: Main cellranger and configuration file such as cellranger settings, paths to singularity images, etc (see [cellranger params](#configuration-of-pipeline-parameters-cellranger)).
 * `config/larry_config.yaml`: Parameters regarding larry barcode processing. **Important to check before running the pipeline**. The default behavior is to run the pipeline with LARRY processing activated. If you don't have larry barcodes but want to run the pipeline, switch it to off (see [Larry params](#larry-configuration)).
 * `config/cellhash_config.yaml`: Reference file for cellhashing processing. No need to edit if cellhashing was not used to prepare the libraries (see [Cellhashing params](#cellhashing-configuration)).

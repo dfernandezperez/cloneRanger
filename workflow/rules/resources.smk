@@ -3,36 +3,27 @@ rule clean_names:
     input:
         get_fastqs,
     output:
-        fw = temp("data/symlink/{sample}_{lib_type}_S1_L00{lane}_R1_001.fastq.gz"),
-        rv = temp("data/symlink/{sample}_{lib_type}_S1_L00{lane}_R2_001.fastq.gz"),
-    container:
-        None
-    shell:
-        """
-        ln -s {input[0]} {output.fw}
-        ln -s {input[1]} {output.rv}
-        """
+        fw = temp("data/symlink/{sample}_{lib_type}_{lane}_R1.fastq.gz"),
+        rv = temp("data/symlink/{sample}_{lib_type}_{lane}_R2.fastq.gz"),
+    script:
+        "../scripts/python/create_symlink.py"
 
 rule clean_names_atac:
     input:
         get_atac_fastqs,
     output:
-        temp("data/symlink/{sample}_{lib_type}_S1_L00{lane}_R3_001.fastq.gz"),
-    container:
-        None
-    shell:
-        """
-        ln -s {input} {output}
-        """
+        temp("data/symlink/{sample}_{lib_type}_{lane}_R3.fastq.gz"),
+    script:
+        "../scripts/python/create_symlink_atac.py"
 
 rule merge_lanes:
     input:
         fw = lambda w: expand(
-            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R1_001.fastq.gz", 
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_{sample.lane}_R1.fastq.gz", 
             sample=units.loc[(w.sample, w.lib_type)].itertuples()
             ),
         rv = lambda w: expand(
-            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R2_001.fastq.gz", 
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_{sample.lane}_R2.fastq.gz", 
             sample=units.loc[(w.sample, w.lib_type)].itertuples()
             )
     output:
