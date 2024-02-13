@@ -95,7 +95,7 @@ Then just add the path of those files to `config/config.yaml` in their correspon
 * `hamming_distance`: The hamming distance that will be used to collapse larry barcodes. We have seen that for a barcode of 20 nucleotides in length, `3` or `4` are good values. 
 * `reads_cutoff`: Number of minimum reads that a molecule needs to have in order to consider a UMI. Cellranger considers any molecule sequenced at least 1 time as a valid UMI. Since usually we sequence LARRY libraries at >90% saturation, most molecules should be sequenced way more than 1 time (we are sequencing many PCR duplicates). Setting this threshold `between 5 and 10` has helped us to reduce the number of false positive larry assignments in our datasets.
 * `umi_cutoff`: Number of UMIs required to consider a LARRY barcode detected in a cell when performing the barcode calling. This depends a lot on the expression of the barcode mRNA. For LARRY-v1 libraries this value could be increase easily at 5-10, however with LARRY-v2 the expression is lower. This can be easily re-executed by the user in R after running the pipeline. Default: `3`
-* `bc_patterns`: The patterns of the larry barcodes integrated in the sequenced cells. **IMPORTANT**: Right now the pipeline **DOES NOT** allow to use underscores (`_`) in the larry barcode name (Sapphire, GFP, etc...). It has the following structure:
+* `bc_patterns`: The patterns of the larry barcodes integrated in the sequenced cells. It has the following structure:
 
     ```yaml
     bc_patterns:

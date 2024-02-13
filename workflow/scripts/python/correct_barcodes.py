@@ -29,7 +29,6 @@ def create_feature_ref(reference_dict, color, read, feature_ref):
     bc_df['sequence']     = bc_df['sequence'].str.replace(extra_nts, '', regex=True).astype('str')
     bc_df['name']         = bc_df.groupby('id').cumcount() + 1
     bc_df['name']         = bc_df['id'] + "_" + bc_df['name'].astype(str)
-    bc_df['id']           = bc_df['name']
     bc_df['read']         = read
     bc_df['pattern']      = extra_nts + "(BC)"
     bc_df['feature_type'] = "Custom"

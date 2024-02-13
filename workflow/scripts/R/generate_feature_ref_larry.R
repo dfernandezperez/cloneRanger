@@ -11,7 +11,6 @@ feature_ref <- snakemake@input %>%
   purrr::map(read_csv) %>% 
   bind_rows() %>% 
   mutate(
-    id    = str_replace(id, "_.*$", ""),
     name = id
   ) %>% 
   distinct() %>% 
