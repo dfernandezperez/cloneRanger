@@ -2,7 +2,7 @@ rule create_seurat:
     input:
         unpack(get_cellranger_output)
     output:
-        temp("results/02_createSeurat/seurat_{sample}_tmp.rds")
+        temp("results/02_createSeurat/tmp_seurat_{sample}.rds")
     params:
         is_cell_hashing = lambda w: "TRUE" if is_cell_hashing(w.sample) else "FALSE",
         cellhash_names  = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "FALSE",
@@ -30,7 +30,7 @@ rule create_seurat:
 if is_feature_bc():
     rule barcode_filtering:
         input:
-            "results/02_createSeurat/seurat_{sample}_tmp.rds"
+            "results/02_createSeurat/tmp_seurat_{sample}.rds"
         output:
             "results/02_createSeurat/seurat_{sample}.rds",
         params:
@@ -52,7 +52,7 @@ if is_feature_bc():
 else:
     rule update_rds_name:
         input:
-            "results/02_createSeurat/seurat_{sample}_tmp.rds"
+            "results/02_createSeurat/tmp_seurat_{sample}.rds"
         output:
             "results/02_createSeurat/seurat_{sample}.rds",
         log:
@@ -110,7 +110,7 @@ rule RNA_exploration:
 
 rule barcode_summary:
     input:
-       "results/02_createSeurat/seurat_{sample}_larryFilt.rds"
+       "results/02_createSeurat/seurat_{sample}.rds"
     output:
         html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
     params:
