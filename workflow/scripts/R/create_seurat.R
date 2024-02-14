@@ -104,10 +104,13 @@ remove_doublets <- function(seurat, cores = 1) {
   sce <- NormalizeData(seurat) %>% as.SingleCellExperiment()
   sce <- scDblFinder(sce, samples = "sample", BPPARAM = MulticoreParam(cores))
   
-  dblt_info <- sce$scDblFinder.class
-  names(dblt_info) <- rownames(sce@colData)
+  dblt_info  <- sce$scDblFinder.class
+  dblt_score <- sce$scDblFinder.score
+  names(dblt_info)  <- rownames(sce@colData)
+  names(dblt_score) <- rownames(sce@colData)
   seurat$scDblFinder.class <- dblt_info
-  
+  seurat$scDblFinder.class <- dblt_score
+ 
   print("Total number of singlets and doublets")
   print(table(seurat$scDblFinder.class))
   
@@ -214,7 +217,7 @@ if (snakemake@params[["library_type"]] == "ARC") {
 
 }
 
-# Remove doublets
+# Call cell doublets with scDblFinder
 seurat <- remove_doublets(seurat, cores = snakemake@threads[[1]])
 
 # Add mitochondrial and ribosomal RNA metrics
@@ -223,30 +226,26 @@ ribo_pattern             <- snakemake@params[["ribo_pattern"]]
 seurat[["percent.mt"]]   <- PercentageFeatureSet(seurat, pattern = mito_pattern)
 seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = ribo_pattern)
 
-# Filter doublets and save object
-seurat_clean <- subset(seurat, subset = scDblFinder.class == "singlet")
-
 # If the library has been processed with cell hashing, assign cells to subsamples in seurat without doublets
 if (snakemake@params[["is_cell_hashing"]]) {
   
-  seurat_clean <- cell_hashing_assignment(
-    seurat         = seurat_clean,
+  seurat <- cell_hashing_assignment(
+    seurat         = seurat,
     cellhash_names = snakemake@params[["cellhash_names"]],
     sample_name    = snakemake@wildcards[["sample"]]
   )
   
-  seurat_clean <- cell_hashing_assignment_seurat(
-    seurat         = seurat_clean,
+  seurat <- cell_hashing_assignment_seurat(
+    seurat         = seurat,
     cellhash_names = snakemake@params[["cellhash_names"]],
     sample_name    = snakemake@wildcards[["sample"]]
   )
   
   pdf(paste0("results/02_createSeurat/", snakemake@wildcards[["sample"]], "_cellhash.pdf"), width = 8, height = 8)
-  summary_cellhashing(seurat_clean, snakemake@params[["cellhash_names"]])
+  summary_cellhashing(seurat, snakemake@params[["cellhash_names"]])
   dev.off()
   
 }
 
 # Save to rds
-saveRDS(seurat_clean, snakemake@output[["no_doublets"]])
-saveRDS(seurat, snakemake@output[["raw"]])
+saveRDS(seurat, snakemake@output[[1]])

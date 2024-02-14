@@ -85,13 +85,6 @@ def is_cell_hashing(sample):
         return False
 
 
-def get_seurat_rds(wildcards):
-    if is_feature_bc():
-        return expand("results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds", sample = SAMPLES)
-    else:
-        return expand("results/02_createSeurat/seurat_{sample}_noDoublets.rds", sample = SAMPLES)
-
-
 def get_cellranger_input(wildcards):
     if is_feature_bc() or is_cell_hashing(wildcards.sample):
         return {

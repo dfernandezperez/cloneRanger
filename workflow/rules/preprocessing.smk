@@ -2,8 +2,7 @@ rule create_seurat:
     input:
         unpack(get_cellranger_output)
     output:
-        no_doublets = "results/02_createSeurat/seurat_{sample}_noDoublets.rds",
-        raw         = "results/02_createSeurat/seurat_{sample}_raw.rds"
+        temp("results/02_createSeurat/seurat_{sample}_tmp.rds")
     params:
         is_cell_hashing = lambda w: "TRUE" if is_cell_hashing(w.sample) else "FALSE",
         cellhash_names  = lambda w: CELL_HASHING["assignments"][w.sample] if is_cell_hashing(w.sample) else "FALSE",
@@ -27,53 +26,48 @@ rule create_seurat:
         "../scripts/R/create_seurat.R"
 
 
-rule barcode_filtering:
-    input:
-        "results/02_createSeurat/seurat_{sample}_noDoublets.rds"
-    output:
-        "results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds"
-    params:
-        reads_cutoff  = LARRY["reads_cutoff"],
-        umi_cutoff    = LARRY["umi_cutoff"],
-        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
-    conda:
-         "../envs/Seurat.yaml"
-    threads:
-        RESOURCES["barcode_filtering"]["cpu"]
-    resources:
-        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
-    log:
-        "results/00_logs/barcode_filtering/{sample}.log"
-    benchmark:
-        "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
-    script:
-        "../scripts/R/barcode_filtering.R"
-
-
-rule barcode_summary:
-    input:
-       "results/02_createSeurat/seurat_{sample}_noDoublets-larry-filt.rds"
-    output:
-        html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
-    params:
-        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
-    conda:
-         "../envs/Seurat.yaml"
-    threads:
-        RESOURCES["barcode_filtering"]["cpu"]
-    resources:
-        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
-    log:
-        "results/00_logs/barcode_filtering/{sample}.log"
-    benchmark:
-        "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
-    script:
-        "../scripts/R/barcode_summary.Rmd"
+# If there is larry filter the matrix, otherwise just update .rds filenames.
+if is_feature_bc():
+    rule barcode_filtering:
+        input:
+            "results/02_createSeurat/seurat_{sample}_tmp.rds"
+        output:
+            "results/02_createSeurat/seurat_{sample}.rds",
+        params:
+            reads_cutoff  = LARRY["reads_cutoff"],
+            umi_cutoff    = LARRY["umi_cutoff"],
+            molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
+        conda:
+            "../envs/Seurat.yaml"
+        threads:
+            RESOURCES["barcode_filtering"]["cpu"]
+        resources:
+            mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+        log:
+            "results/00_logs/barcode_filtering/{sample}.log"
+        benchmark:
+            "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
+        script:
+            "../scripts/R/barcode_filtering.R"
+else:
+    rule update_rds_name:
+        input:
+            "results/02_createSeurat/seurat_{sample}_tmp.rds"
+        output:
+            "results/02_createSeurat/seurat_{sample}.rds",
+        log:
+            "results/00_logs/update_rds_name/{sample}.log"
+        benchmark:
+            "results/benchmarks/update_rds_name/{sample}_benchmark.txt"
+        shell:
+            """
+            mv {input} {output}
+            """
 
 
 rule merge_seurat:
     input:
-        get_seurat_rds
+        expand("results/02_createSeurat/seurat_{sample}.rds", sample = SAMPLES)
     output:
         seurat = "results/03_mergeSeurat/seurat_merged.rds",
     conda:
@@ -112,3 +106,24 @@ rule RNA_exploration:
         "results/benchmarks/RNA_exploration/benchmark.txt"
     script:
         "../scripts/R/RNA_exploration.Rmd"
+
+
+rule barcode_summary:
+    input:
+       "results/02_createSeurat/seurat_{sample}_larryFilt.rds"
+    output:
+        html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
+    params:
+        molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
+    conda:
+         "../envs/Seurat.yaml"
+    threads:
+        RESOURCES["barcode_filtering"]["cpu"]
+    resources:
+        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+    log:
+        "results/00_logs/barcode_filtering/{sample}.log"
+    benchmark:
+        "results/benchmarks/barcode_filtering/{sample}_benchmark.txt"
+    script:
+        "../scripts/R/barcode_summary.Rmd"
