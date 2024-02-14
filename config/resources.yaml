@@ -10,7 +10,7 @@ correct_barcodes:
     MaxMem: 6000
 
 extract_barcodes:
-    MaxMem: 16000
+    MaxMem: 45000
 
 create_seurat:
     cpu   : 1
