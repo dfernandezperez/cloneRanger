@@ -109,7 +109,7 @@ remove_doublets <- function(seurat, cores = 1) {
   names(dblt_info)  <- rownames(sce@colData)
   names(dblt_score) <- rownames(sce@colData)
   seurat$scDblFinder.class <- dblt_info
-  seurat$scDblFinder.class <- dblt_score
+  seurat$scDblFinder.score <- dblt_score
  
   print("Total number of singlets and doublets")
   print(table(seurat$scDblFinder.class))
