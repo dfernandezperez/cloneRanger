@@ -47,7 +47,6 @@ preprocessing:
     - Nupr1
     - Rnf220
     - Clu
-    - Tppp3
 
 
 # Location of configuration files. This MUST NOT be modified.

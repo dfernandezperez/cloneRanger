@@ -1,6 +1,6 @@
 sample_id	lane	lib_type	R1	R2	R3
-D14-W1	lane1	CH	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2034_2023-FB-L_S20_R1_001.fastq.gz	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2034_2023-FB-L_S20_R2_001.fastq.gz	
-D14-W1	lane1	GEX	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2034_2023-GEX-L_S3_R1_001.fastq.gz	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2034_2023-GEX-L_S3_R2_001.fastq.gz	
-D14-W2	lane1	GEX	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2035_2023-GEX-L_S4_R1_001.fastq.gz	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2035_2023-GEX-L_S4_R2_001.fastq.gz	
-D14-W1	lane1	FB	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2382_2023-3_S11_R1_001.fastq.gz	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2382_2023-3_S11_R2_001.fastq.gz	
-D14-W2	lane1	FB	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2382_2023-4_S12_R1_001.fastq.gz	/mnt/netapp/Users/SEQUENCING_DATA/isingh/Dnmt3a-exvivoHSCs-Experiment3/genomics-services.irbbarcelona.org/ISinghOct23_scRNASeq_II/AAC7H5MHV_IRB/Fastq/2382_2023-4_S12_R2_001.fastq.gz	
+sample1	lane1	CH	/path/to/CH_R1.fastq.gz	/path/to/CH_R2.fastq.gz
+sample1	lane1	GEX	/path/to/GEX_R1.fastq.gz	/path/to/GEX_R2.fastq.gz
+sample2	lane1	GEX	/path/to/GEX_R1.fastq.gz	/path/to/GEX_R2.fastq.gz
+sample1	lane1	FB	/path/to/FB_R1.fastq.gz	/path/to/FB_R2.fastq.gz
+sample2	lane1	FB	/path/to/FB_R1.fastq.gz	/path/to/FB_R2.fastq.gz
