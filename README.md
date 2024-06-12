@@ -75,7 +75,7 @@ Cellranger parameters can be configured in `config/config.yaml`. Modify them as 
 
 Inside the file, and also in the file `workflow/schema/config.schema.yaml` you can find what is controlled by each tunable parameter.
 
-Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. You can build your own images or download mine with the following commands:
+Also you have to define the path to the cellranger singularity images and genomes that will be used by the pipeline. By default the pipeline will use docker containers that I created with cellranger installed. You can also build your own singularity files or download mine (if you prefer to specify a sif file instead of a docker repo) with the following commands:
 
 ```bash
 singularity pull docker://dfernand/cellranger:7.1.0 # for GEX
@@ -152,7 +152,7 @@ singularity-args : "--bind /stemcell" # Volumes to mount for singularity (import
 
 Adapt `cores`, `resources` and `default-resources` to your computer hardware. Then adapt the path to bind in singularity from `singularity-args` to the folder in which you are running the pipeline form.
 
-In case of running the pipeline in using slurm:
+In case of running the pipeline using slurm:
 
 ```yaml
 jobs             : unlimited # Define total amount of parallel jobs that the pipeline can execute
@@ -166,8 +166,8 @@ Particularly important to adapt the volumes to bind for singularity to your own 
 Once you have all the configuration files as desired, it's time to execute the pipeline. For that you have to execute the `execute_pipeline.sh` script, followed by the name of the rule that you want to execute. There is one script to execute the pipeline locally and another for execution in HPC's with slurm:
 
  ```bash
-./local_execute_pipeline.sh #local
-./slurm_execute_pipeline.sh
+./local_execute_pipeline.sh # local
+./slurm_execute_pipeline.sh # HPC with slurm scheduler
 ```
 
 If no rule is given it will automatically execute the rule `all` (which would execute the standard pipeline).
