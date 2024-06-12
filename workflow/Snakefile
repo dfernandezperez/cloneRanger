@@ -9,7 +9,6 @@ configfile: "config/config.yaml"
 container : "docker://condaforge/mambaforge:4.10.3-6"
 
 
-#-----------------------------------------------------------------------------------------------------------------------
 # Load sample sheet and cluster configuration, config file and validate structures
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -38,27 +37,29 @@ SAMPLES       = set(units["sample_id"])
 LARRY_COLORS  = [color for color in LARRY["bc_patterns"].values()] if LARRY["feature_bc"] else None
 
 
-#-----------------------------------------------------------------------------------------------------------------------
 # Rules
 #-----------------------------------------------------------------------------------------------------------------------
-include: "rules/common.smk"
-include: "rules/resources.smk"
-include: "rules/counts.smk"
+include: "rules/helper_functions.smk"
+include: "rules/prepare_fastqs.smk"
+include: "rules/create_cellranger_libraries.smk"
 include: "rules/larry_processing.smk"
-include: "rules/preprocessing.smk"
+include: "rules/counts.smk"
+include: "rules/seurat_preprocessing.smk"
+
+localrules: all, clean_names, clean_names_atac
 
 # Create a small dictionary with the library types corresponding to each sample. This is done in this way to be able to 
 # execute the pipeline without larry (fb) or cellhashing also when those fastq files are present in the units.tsv file.
-SAMPLE_LIB_DICT = {key: [] for key in SAMPLES}
+SAMPLE_LIB_DICT = {key: set() for key in SAMPLES}
 for sample,lib_type in zip(units["sample_id"].values, units["lib_type"].values):
     if not is_feature_bc() and lib_type == "FB":
         next
     elif not is_cell_hashing(sample) and lib_type == "CH":
         next
     else:
-        SAMPLE_LIB_DICT[sample].append(lib_type)
+        SAMPLE_LIB_DICT[sample].add(lib_type)
 
-#-----------------------------------------------------------------------------------------------------------------------
+
 # Rule all
 #-----------------------------------------------------------------------------------------------------------------------
 # Define target files based on pipeline

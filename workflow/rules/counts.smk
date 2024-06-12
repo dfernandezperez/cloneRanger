@@ -15,9 +15,9 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX":
         params:
             introns     = convert_introns(),
             n_cells     = get_expected_cells,
-            genome      = config["genome_reference_gex"],
+            genome      = config["cellranger_count"]["genome_reference_gex"],
             extra_p     = config["cellranger_count"]["extra_parameters_rna"],
-            mem_gb      = round(int(RESOURCES["cellranger_count"]["MaxMem"])/1000),
+            mem_gb      = round(int(RESOURCES["cellranger_count"]["mem_mb"])/1000),
             feature_ref = get_feature_ref
         log:
             "results/00_logs/counts/{sample}.log",
@@ -26,9 +26,10 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX":
         threads:
             RESOURCES["cellranger_count"]["cpu"]
         resources:
-            mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
+            mem_mb  = RESOURCES["cellranger_count"]["mem_mb"],
+            runtime = RESOURCES["cellranger_count"]["runtime"]
         container: 
-            config["cellranger_rna_sif"]
+            config["singularity"]["cellranger_rna_sif"]
         shell:
             """
             cellranger count \
@@ -62,8 +63,8 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
                 subcategory = "{sample}",
             ),
         params:
-            genome  = config["genome_refrerence_arc"],
-            mem_gb  = config["cellranger_count"]["mem"],
+            genome  = config["cellranger_count"]["genome_refrerence_arc"],
+            mem_gb  = round(int(RESOURCES["cellranger_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_atac"]
         log:
             "results/00_logs/counts/{sample}.log",
@@ -72,9 +73,10 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
         threads:
             RESOURCES["cellranger_count"]["cpu"]
         resources:
-            mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
+            mem_mb  = RESOURCES["cellranger_count"]["mem_mb"],
+            runtime = RESOURCES["cellranger_count"]["runtime"]
         container: 
-            config["cellranger_atac_sif"]
+            config["singularity"]["cellranger_atac_sif"]
         shell:
             """
             cellranger-atac count \
@@ -116,19 +118,20 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             ),
         params:
             introns = convert_introns(),
-            genome  = config["genome_refrerence_arc"],
-            mem_gb  = config["cellranger_count"]["mem"],
+            genome  = config["cellranger_count"]["genome_refrerence_arc"],
+            mem_gb  = round(int(RESOURCES["cellranger_arc_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_arc"]
         log:
             "results/00_logs/cellranger_arc_count/{sample}.log",
         benchmark:
             "results/benchmarks/cellranger_arc_count/{sample}.txt"
         threads:
-            RESOURCES["cellranger_count"]["cpu"]
+            RESOURCES["cellranger_arc_count"]["cpu"]
         resources:
-            mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
+            mem_mb  = RESOURCES["cellranger_arc_count"]["mem_mb"],
+            runtime = RESOURCES["cellranger_arc_count"]["runtime"]
         container: 
-            config["cellranger_multiome_sif"]
+            config["singularity"]["cellranger_multiome_sif"]
         shell:
             """
             cellranger-arc count \
@@ -162,9 +165,9 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             params:
                 introns     = convert_introns(),
                 n_cells     = get_expected_cells,
-                genome      = config["genome_reference_gex"],
+                genome      = config["cellranger_count"]["genome_reference_gex"],
                 extra_p     = config["cellranger_count"]["extra_parameters_rna"],
-                mem_gb      = config["cellranger_count"]["mem"],
+                mem_gb      = round(int(RESOURCES["cellranger_count"]["mem_mb"])/1000),
                 feature_ref = get_feature_ref
             log:
                 "results/00_logs/counts/{sample}.log",
@@ -173,9 +176,10 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             threads:
                 RESOURCES["cellranger_count"]["cpu"]
             resources:
-                mem_mb = RESOURCES["cellranger_count"]["MaxMem"]
+                mem_mb  = RESOURCES["cellranger_count"]["mem_mb"],
+                runtime = RESOURCES["cellranger_count"]["runtime"]
             container: 
-                config["cellranger_rna_sif"]
+                config["singularity"]["cellranger_rna_sif"]
             shell:
                 """
                 cellranger count \

@@ -1,29 +1,61 @@
-# Maxmem has to be specified in megabytes (To transform gb to mb just do gb*1000)
+# By rule resources
+# --------------------------------------------------------------------------------
+
+# mem_mb has to be specified in megabytes (To transform gb to mb just do gb*1000)
+merge_lanes:
+    runtime: 15
+
 cellranger_count:
-    cpu   : 90
-    MaxMem: 128000
+    cpu   : 20
+    mem_mb: 128000
+    runtime: 180
+
+cellranger_arc_count:
+    cpu   : 20
+    mem_mb: 128000
+    runtime: 180
 
 collapse_fastq_hd:
-    MaxMem: 30000
+    mem_mb: 30000
+    runtime: 300
+    retries: 3
 
 correct_barcodes:
-    MaxMem: 6000
+    mem_mb: 15000
+    runtime: 15
+    retries: 3
 
 extract_barcodes:
-    MaxMem: 45000
+    mem_mb: 50000
+    runtime: 90
+    retries: 3
 
 create_seurat:
-    cpu   : 1
-    MaxMem: 16000
+    cpu   : 10
+    mem_mb: 16000
+    runtime: 60
+    retries: 3
 
 RNA_exploration:
     cpu   : 1
-    MaxMem: 100000
+    mem_mb: 100000
+    runtime: 180
+    retries: 3
 
 merge_seurat:
     cpu : 1
-    MaxMem: 100000
+    mem_mb: 100000
+    runtime: 30
+    retries: 3
 
 barcode_filtering:
     cpu : 1
-    MaxMem: 30000
+    mem_mb: 30000
+    runtime: 30
+    retries: 3
+
+barcode_summary:
+    cpu : 1
+    mem_mb: 30000
+    runtime: 30
+    retries: 3

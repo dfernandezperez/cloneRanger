@@ -1,3 +1,12 @@
 sample_id	UMI_cutoff	n_cells
-sample1	0	auto
-sample2	0	auto
+sample1-rep1	0	auto
+sample1-rep2	0	auto
+sample2-W1	0	auto
+sample2-W2	0	auto
+sample3-LSK-W1	0	auto
+sample3-LSK-W2	0	auto
+sample3-LK-W1	0	auto
+sample3-LK-W2	0	auto
+sample4-W1	0	auto
+sample4-W2	0	auto
+sample4-W3	0	auto

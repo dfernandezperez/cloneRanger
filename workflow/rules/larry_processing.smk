@@ -10,7 +10,7 @@ rule extract_barcodes:
                 read_fb = LARRY["read_feature_bc"]
                 )
             ),
-        filt_cb = "data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(LARRY["read_cellular_bc"])
+        filt_cb = temp("data/clean/{{sample}}_FB_S1_L001_{}_001.fastq.gz".format(LARRY["read_cellular_bc"]))
     params:
         barcode_dict = LARRY["bc_patterns"]
     log:
@@ -20,7 +20,9 @@ rule extract_barcodes:
     conda:
          "../envs/python.yaml"
     resources:
-        mem_mb = RESOURCES["extract_barcodes"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["extract_barcodes"]["mem_mb"], 20000),
+        runtime = RESOURCES["extract_barcodes"]["runtime"],
+        retries = RESOURCES["extract_barcodes"]["retries"]
     script:
         "../scripts/python/extract_barcodes.py"
 
@@ -35,12 +37,14 @@ rule collapse_fastq_hd:
     benchmark:
         "results/benchmarks/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
-        mem_mb = RESOURCES["collapse_fastq_hd"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["collapse_fastq_hd"]["mem_mb"], 20000),
+        runtime = RESOURCES["collapse_fastq_hd"]["runtime"],
+        retries = RESOURCES["collapse_fastq_hd"]["retries"]
     container:
-        "docker://dfernand/umicollapse:07506e661496033ca059e04a7771633b7b70721f"
+        config["singularity"]["umicollapse"]
     shell:
         """
-        java -Xmx200G -Xss1G -jar /UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
+        java -Xms{resources.mem_mb}m -Xmx{resources.mem_mb}m -Xss1G -jar /UMICollapse/umicollapse.jar fastq -k {wildcards.hd} --tag -i {input} -o {output} 2> {log}
         """
 
 
@@ -55,7 +59,9 @@ rule correct_barcodes:
     benchmark:
         "results/benchmarks/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
-        mem_mb = RESOURCES["correct_barcodes"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["correct_barcodes"]["mem_mb"], 10000),
+        runtime = RESOURCES["correct_barcodes"]["runtime"],
+        retries = RESOURCES["correct_barcodes"]["retries"]
     conda:
          "../envs/python.yaml"
     script:

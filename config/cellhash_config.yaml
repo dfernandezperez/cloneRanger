@@ -1,3 +1,5 @@
+# TotalSeq sequences, read location and fastq file (R1 or R2)
+# --------------------------------------------------------------------------------
 # Sequence and pattern of totalseq or a different method used for cell hashing.
 # https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/multi#samples
 # The information required is the sequence of the barcode, the sample to which it corresponds and barcode location in read
@@ -12,17 +14,53 @@ barcodes:
   TotalSeqMouse3: ["R2", "5PNNNNNNNNNN(BC)", "CTTGCCGCATGTCAT"]
   TotalSeqMouse4: ["R2", "5PNNNNNNNNNN(BC)", "AAAGCATTCTTCACG"]
 
+
+# TotalSeq sample metadata
+# --------------------------------------------------------------------------------
 # Here you have to write the cellhashing Ab ID that corresponds to every sample.
 # The Ab ID are those defined previosly in "barcodes". The structure has to be the following:
 # sample_id (from units.tsv):
 #   Ab-Id: subsample_id (the one you like)
 # "subsample_id" will be used as the new sample name, which will appear in the seurat object.
 # Example:
-  # No-MS5-HSC:
-  #   TotalSeqMouse1: "No-MS5-HSC-rep1"
-  #   TotalSeqMouse3: "No-MS5-HSC-rep2"
+  # sample1:
+  #   TotalSeqMouse1: "sample1-rep1"
+  #   TotalSeqMouse3: "sample1-rep2"
 assignments:
-  D14-W1:
+  sample2-W1:
     TotalSeqMouse1: "TotalSeqMouse1"
     TotalSeqMouse2: "TotalSeqMouse2"
     TotalSeqMouse3: "TotalSeqMouse3"
+  sample2-W2:
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
+    TotalSeqMouse4: "TotalSeqMouse4"
+  sample3-LSK-W1:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
+  sample3-LSK-W2:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse4: "TotalSeqMouse4"
+  sample3-LK-W2:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse4: "TotalSeqMouse4"
+  sample3-LK-W1:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
+  sample4-W1:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
+    TotalSeqMouse4: "TotalSeqMouse4"
+  sample4-W2:
+    TotalSeqMouse1: "TotalSeqMouse1"
+    TotalSeqMouse2: "TotalSeqMouse2"
+    TotalSeqMouse3: "TotalSeqMouse3"
+    TotalSeqMouse4: "TotalSeqMouse4"
+  sample4-W3:
+    TotalSeqMouse3: "TotalSeqMouse3"
+    TotalSeqMouse4: "TotalSeqMouse4"

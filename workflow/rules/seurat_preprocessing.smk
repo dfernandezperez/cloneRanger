@@ -17,7 +17,9 @@ rule create_seurat:
     threads:
         RESOURCES["create_seurat"]["cpu"]
     resources:
-        mem_mb = RESOURCES["create_seurat"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["create_seurat"]["mem_mb"], 20000),
+        runtime = RESOURCES["create_seurat"]["runtime"],
+        retries = RESOURCES["create_seurat"]["retries"]
     log:
         "results/00_logs/create_seurat/{sample}.log"
     benchmark:
@@ -42,7 +44,9 @@ if is_feature_bc():
         threads:
             RESOURCES["barcode_filtering"]["cpu"]
         resources:
-            mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+            mem_mb  = RESOURCES["barcode_filtering"]["mem_mb"],
+            runtime = RESOURCES["barcode_filtering"]["runtime"],
+            retries = RESOURCES["barcode_filtering"]["retries"]
         log:
             "results/00_logs/barcode_filtering/{sample}.log"
         benchmark:
@@ -75,7 +79,9 @@ rule merge_seurat:
     threads:
         RESOURCES["merge_seurat"]["cpu"]
     resources:
-        mem_mb = RESOURCES["merge_seurat"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["merge_seurat"]["mem_mb"], 50000),
+        runtime = RESOURCES["merge_seurat"]["runtime"],
+        retries = RESOURCES["merge_seurat"]["retries"]
     log:
         "results/00_logs/merge_seurat/log"
     benchmark:
@@ -99,7 +105,9 @@ rule RNA_exploration:
     threads:
         RESOURCES["RNA_exploration"]["cpu"]
     resources:
-        mem_mb = RESOURCES["RNA_exploration"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["RNA_exploration"]["mem_mb"], 50000),
+        runtime = RESOURCES["RNA_exploration"]["runtime"],
+        retries = RESOURCES["RNA_exploration"]["retries"]
     log:
         "results/00_logs/RNA_exploration/log"
     benchmark:
@@ -120,7 +128,9 @@ rule barcode_summary:
     threads:
         RESOURCES["barcode_filtering"]["cpu"]
     resources:
-        mem_mb = RESOURCES["barcode_filtering"]["MaxMem"]
+        mem_mb  = get_mem_mb(RESOURCES["barcode_summary"]["mem_mb"], 20000),
+        runtime = RESOURCES["barcode_summary"]["runtime"],
+        retries = RESOURCES["barcode_summary"]["retries"]
     log:
         "results/00_logs/barcode_filtering/{sample}.log"
     benchmark:

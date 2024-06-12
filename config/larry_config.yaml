@@ -1,16 +1,26 @@
 # Does the data contain larry data or not
+# --------------------------------------------------------------------------------
 feature_bc: True
-# Fastq in which the barcode is located. Can be R1 or R2
-read_feature_bc: "R2"
-# Fastq in which the cellular barcode is located. Must be the opposite of read_feature_bc
-read_cellular_bc: "R1"
+
+
+# Feature and cellular barcode fastq files
+# --------------------------------------------------------------------------------
+read_feature_bc : "R2" # Fastq containing LARRY bc. Can be R1 or R2. Default: R2
+read_cellular_bc: "R1" # Fastq containing the cellular barcode. Default: R1
+
+
 # Hamming distance to collapse barcodes with umicollapse
-hamming_distance: 4 
-reads_cutoff: 10
-umi_cutoff: 3
-# Structure --> barcode-sequence : barcode name. i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
+# --------------------------------------------------------------------------------
+hamming_distance: 4  # Hamming distance to collapse barcodes with umicollapse
+reads_cutoff    : 10 # Minimum amount of reads to call a LARRY UMI
+umi_cutoff      : 3  # Minimum number of UMIs to consider a LARRY barcode as detected
+
+
+# LARRY BARCODE PATTERNS
+# --------------------------------------------------------------------------------
+# Structure --> barcode-sequence : barcode name
+# i.e: "ACGT..GTA..GCC..GGGTA..GA" : "Scarlet"
 # Special characters won't be escaped.  
-# IMPORTANT!!! --> LARRY BARCODE NAMES CAN'T HAVE UNDERSCORES ('_') IN THEIR NAMES (can have other characters)
 bc_patterns:
   "GTTCCA....TG....CA....GT....AG...." : "Sapphire1"
   "TGCTAA....TG....CA....GT....AG...." : "Sapphire2"

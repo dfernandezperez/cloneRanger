@@ -1,0 +1,11 @@
+executor         : slurm
+jobs             : unlimited # Define total amount of parallel jobs that the pipeline can execute
+latency-wait     : 60
+keep-going       : true
+use-singularity  : true
+singularity-args : "--bind /scratch --bind /data --bind /home"
+--use-conda      : true
+default-resources: 
+  mem_mb : 1000 # Set default ram for rules (cores is by default 1)
+  runtime: 5    # Set the default walltime for jobs (in minutes)
+  retries: 1    # Set the default number of retires if a job fails
