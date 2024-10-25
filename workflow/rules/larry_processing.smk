@@ -21,8 +21,9 @@ rule extract_barcodes:
          "../envs/python.yaml"
     resources:
         mem_mb  = get_mem_mb(RESOURCES["extract_barcodes"]["mem_mb"], 20000),
-        runtime = RESOURCES["extract_barcodes"]["runtime"],
-        retries = RESOURCES["extract_barcodes"]["retries"]
+        runtime = RESOURCES["extract_barcodes"]["runtime"]
+    retries:
+        RESOURCES["extract_barcodes"]["retries"]
     script:
         "../scripts/python/extract_barcodes.py"
 
@@ -38,8 +39,9 @@ rule collapse_fastq_hd:
         "results/benchmarks/collapse_fastq_hd/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
         mem_mb  = get_mem_mb(RESOURCES["collapse_fastq_hd"]["mem_mb"], 20000),
-        runtime = RESOURCES["collapse_fastq_hd"]["runtime"],
-        retries = RESOURCES["collapse_fastq_hd"]["retries"]
+        runtime = RESOURCES["collapse_fastq_hd"]["runtime"]
+    retries:
+        RESOURCES["collapse_fastq_hd"]["retries"]
     container:
         config["singularity"]["umicollapse"]
     shell:
@@ -60,8 +62,9 @@ rule correct_barcodes:
         "results/benchmarks/correct_barcodes/{sample}_{read_fb}_{larry_color}_{hd}.txt"
     resources:
         mem_mb  = get_mem_mb(RESOURCES["correct_barcodes"]["mem_mb"], 10000),
-        runtime = RESOURCES["correct_barcodes"]["runtime"],
-        retries = RESOURCES["correct_barcodes"]["retries"]
+        runtime = RESOURCES["correct_barcodes"]["runtime"]
+    retries:
+        RESOURCES["correct_barcodes"]["retries"]
     conda:
          "../envs/python.yaml"
     script:
