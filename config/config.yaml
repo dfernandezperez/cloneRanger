@@ -2,7 +2,7 @@
 # --------------------------------------------------------------------------------
 singularity:
   umicollapse             : docker://dfernand/umicollapse:07506e661496033ca059e04a7771633b7b70721f
-  cellranger_rna_sif      : docker://dfernand/cellranger:7.1.0
+  cellranger_rna_sif      : docker://dfernand/cellranger:7.1.0 # docker://biotechpedro/cellranger:8.0.1 if v8.0.1
   cellranger_multiome_sif : docker://dfernand/cellranger_arc:2.0.2
   cellranger_atac_sif     : docker://dfernand/cellranger_atac:2.1.0
 
@@ -19,7 +19,7 @@ cellranger_count:
   # Extra parameters for cellranger. Non-secondary is used to avoid cellranger
   # to perform UMAP, clustering, DEGs... 
   extra_parameters_atac: "--nosecondary"
-  extra_parameters_rna: "--nosecondary"
+  extra_parameters_rna: "--nosecondary" # add "--nosecondary --create-bam <true|false>" if v8.0.1
   extra_parameters_arc: ""
 
 
