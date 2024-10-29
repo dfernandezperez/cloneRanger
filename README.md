@@ -163,29 +163,29 @@ Particularly important to adapt the volumes to bind for singularity to your own 
 
 ## Execution of the pipeline
 
-Once you have all the configuration files as desired, it's time to execute the pipeline. For that you have to execute the `execute_pipeline.sh` script, followed by the name of the rule that you want to execute. There is one script to execute the pipeline locally and another for execution in HPC's with slurm:
+Once you have all the configuration files as desired, it's time to execute the pipeline. For that you have to execute the `execute_snakemake.sh` scripts, followed by the name of the rule that you want to execute. There is one script to execute the pipeline locally and another for execution in HPC's with slurm:
 
  ```bash
-./local_execute_pipeline.sh # local
-./slurm_execute_pipeline.sh # HPC with slurm scheduler
+./local_execute_snakemake.sh # local
+./slurm_execute_snakemake.sh # HPC with slurm scheduler
 ```
 
 If no rule is given it will automatically execute the rule `all` (which would execute the standard pipeline).
 
 ```bash
-./local_execute_pipeline.sh  all
+./local_execute_snakemake.sh  all
 ```
 
 is equivalent to 
 
 ```bash
-./local_execute_pipeline.sh
+./local_execute_snakemake.sh
 ```
 
 If you want to add extra snakemake parameters without modifying `config/snakemake_profile/config.yaml`:
 
 ```bash
-./local_execute_pipeline.sh --rerun-triggers mtime
+./local_execute_snakemake.sh --rerun-triggers mtime
 ```
 
 
