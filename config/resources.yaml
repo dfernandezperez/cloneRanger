@@ -5,7 +5,7 @@
 merge_lanes:
     runtime: 15
     mem_mb: 2000
-    retires: 3
+    retries: 3
 
 cellranger_count:
     cpu   : 20
