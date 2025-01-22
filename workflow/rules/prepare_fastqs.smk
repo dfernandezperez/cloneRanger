@@ -32,7 +32,10 @@ rule merge_lanes:
     log:
         "results/00_logs/merge_lanes/{sample}_{lib_type}.log"
     resources:
+        mem_mb  = get_mem_mb(RESOURCES["merge_lanes"]["mem_mb"], 4000),
         runtime = RESOURCES["merge_lanes"]["runtime"]
+    retries:
+        RESOURCES["merge_lanes"]["retries"]
     container:
         None
     shell:
@@ -52,7 +55,10 @@ rule merge_lanes_atac:
     log:
         "results/00_logs/merge_lanes_atac/{sample}_{lib_type}.log"
     resources:
+        mem_mb  = get_mem_mb(RESOURCES["merge_lanes"]["mem_mb"], 4000),
         runtime = RESOURCES["merge_lanes"]["runtime"]
+    retries:
+        RESOURCES["merge_lanes"]["retries"]
     container:
         None
     shell:
