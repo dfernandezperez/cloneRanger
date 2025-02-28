@@ -14,6 +14,7 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX":
             ),
         params:
             introns     = convert_introns(),
+            bam         = create_bam(),
             n_cells     = get_expected_cells,
             genome      = config["cellranger_count"]["genome_reference_gex"],
             extra_p     = config["cellranger_count"]["extra_parameters_rna"],
@@ -37,6 +38,7 @@ if config["cellranger_count"]["10x_pipeline"] == "GEX":
             {params.n_cells} \
             {params.extra_p}  \
             {params.introns} \
+            {params.bam} \
             --id {wildcards.sample} \
             --transcriptome {params.genome} \
             --libraries {input.libraries} \
@@ -63,6 +65,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
                 subcategory = "{sample}",
             ),
         params:
+            bam     = create_bam(),
             genome  = config["cellranger_count"]["genome_refrerence_arc"],
             mem_gb  = round(int(RESOURCES["cellranger_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_atac"]
@@ -81,6 +84,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
             """
             cellranger-atac count \
             {params.extra_p} \
+            {params.bam} \
             --id {wildcards.sample} \
             --reference {params.genome} \
             --fastqs data/clean \
@@ -118,6 +122,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             ),
         params:
             introns = convert_introns(),
+            bam     = create_bam(),
             genome  = config["cellranger_count"]["genome_refrerence_arc"],
             mem_gb  = round(int(RESOURCES["cellranger_arc_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_arc"]
@@ -137,6 +142,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             cellranger-arc count \
             {params.introns} \
             {params.extra_p} \
+            {params.bam} \
             --id {wildcards.sample} \
             --reference {params.genome} \
             --libraries {input.libraries} \
@@ -164,6 +170,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
                 ),
             params:
                 introns     = convert_introns(),
+                bam         = create_bam(),
                 n_cells     = get_expected_cells,
                 genome      = config["cellranger_count"]["genome_reference_gex"],
                 extra_p     = config["cellranger_count"]["extra_parameters_rna"],
@@ -187,6 +194,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
                 {params.n_cells} \
                 {params.extra_p}  \
                 {params.introns} \
+                {params.bam} \
                 --id {wildcards.sample} \
                 --chemistry=ARC-v1 \
                 --transcriptome {params.genome} \

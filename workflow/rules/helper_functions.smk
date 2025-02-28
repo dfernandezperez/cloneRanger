@@ -141,6 +141,22 @@ def convert_introns():
         sys.exit("Intronic use can be only specified if 10x_pipeline == GEX or GEX_ATAC")
 
 
+def create_bam():
+    """Specify whether bam files should be kept by cellranger
+
+    For ease of use, the user only specifies True or False
+    This function handles the conversion.
+    """
+    if not config["cellranger_count"]["create_bam"]:
+        return "--create-bam false"
+
+    elif config["cellranger_count"]["create_bam"]:
+        return "--create-bam true"
+    
+    else: 
+        sys.exit("create_bam must be specified as True or False.")
+
+
 def is_feature_bc():
     """Specify whether feature barcoding has been performed
     or not

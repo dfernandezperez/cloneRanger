@@ -13,6 +13,7 @@ cellranger_count:
   # 10x pipeline: Must be GEX (rnaseq), ATAC or ARC (multiome, RNA + ATAC).
   10x_pipeline : "GEX"
   introns: True
+  create_bam: False
   # Genome references for GEX and ARC
   genome_reference_gex: /home/dfernandezp/genome_ref_cellranger/refdata-gex-GRCm39-2024-A/
   genome_refrerence_arc: /home/dfernandezp/genome_ref_cellranger/refdata-gex-GRCm39-2024-A/ # would not work but not going to be used
