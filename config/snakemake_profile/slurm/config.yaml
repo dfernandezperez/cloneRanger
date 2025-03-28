@@ -1,5 +1,6 @@
 executor         : slurm
 jobs             : unlimited # Define total amount of parallel jobs that the pipeline can execute
+cores            : 500 # Define total amount of cores that the pipeline can execute
 latency-wait     : 60
 keep-going       : true
 use-singularity  : true
