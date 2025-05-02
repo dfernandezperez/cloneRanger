@@ -47,7 +47,7 @@ rule merge_lanes:
 rule merge_lanes_atac:
     input:
         lambda w: expand(
-            "data/symlink/{sample.sample_id}_{sample.lib_type}_S1_L00{sample.lane}_R3_001.fastq.gz", 
+            "data/symlink/{sample.sample_id}_{sample.lib_type}_{sample.lane}_R3.fastq.gz", 
             sample=units.loc[(w.sample, w.lib_type)].itertuples()
             )
     output:

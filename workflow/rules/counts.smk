@@ -58,6 +58,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
             lambda w: expand("data/clean/{{sample}}_ATAC_S1_L001_{read}_001.fastq.gz", read=["R1", "R2"])
         output:
             mtx  = "results/01_counts/{sample}/outs/filtered_feature_bc_matrix.h5",
+            atac = "results/01_arc/{sample}/outs/atac_fragments.tsv.gz",
             html = report(
                 "results/01_counts/{sample}/outs/web_summary.html",
                 caption     = "../reports/counts.rst",
@@ -65,7 +66,6 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
                 subcategory = "{sample}",
             ),
         params:
-            bam     = create_bam(),
             genome  = config["cellranger_count"]["genome_refrerence_arc"],
             mem_gb  = round(int(RESOURCES["cellranger_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_atac"]
@@ -84,7 +84,6 @@ elif config["cellranger_count"]["10x_pipeline"] == "ATAC":
             """
             cellranger-atac count \
             {params.extra_p} \
-            {params.bam} \
             --id {wildcards.sample} \
             --reference {params.genome} \
             --fastqs data/clean \
@@ -113,6 +112,7 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             libraries   = "data/feature_bc_libraries/{sample}_library_arc.csv"
         output:
             mtx  = "results/01_arc/{sample}/outs/filtered_feature_bc_matrix.h5",
+            atac = "results/01_arc/{sample}/outs/atac_fragments.tsv.gz",
             outs = directory("results/01_arc/{sample}/outs/filtered_feature_bc_matrix"),
             html = report(
                 "results/01_arc/{sample}/outs/web_summary.html",
@@ -122,7 +122,6 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             ),
         params:
             introns = convert_introns(),
-            bam     = create_bam(),
             genome  = config["cellranger_count"]["genome_refrerence_arc"],
             mem_gb  = round(int(RESOURCES["cellranger_arc_count"]["mem_mb"])/1000),
             extra_p = config["cellranger_count"]["extra_parameters_arc"]
@@ -142,7 +141,6 @@ elif config["cellranger_count"]["10x_pipeline"] == "ARC":
             cellranger-arc count \
             {params.introns} \
             {params.extra_p} \
-            {params.bam} \
             --id {wildcards.sample} \
             --reference {params.genome} \
             --libraries {input.libraries} \

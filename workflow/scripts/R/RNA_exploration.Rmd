@@ -189,12 +189,12 @@ if (length(unique(seurat$sample)) == 1) {
       slice(1:9) %>%
       split(f = as.factor(.$cluster)) %>%
       map(pull, gene)
-    
+
     plots <- map(
-      top_9_markers,
-      \(genes) FeaturePlot(seurat, features = genes, ncol = 3, raster=FALSE) & scale_color_viridis()
+    top_9_markers,
+    \(genes) if(length(genes) == 0) {print("No DEGs.")} else {FeaturePlot(seurat, features = genes, ncol = 3, raster=FALSE) & scale_color_viridis()}
     )
-    
+
     in_tabs(plots, level = 1L)
 }
 ```

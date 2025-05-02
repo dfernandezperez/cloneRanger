@@ -1,3 +1,4 @@
+save.image()
 ### Logs
 log <- file(snakemake@log[[1]], open = "wt")
 sink(log)
@@ -58,18 +59,16 @@ create_seurat <- function(input_files, sample_name, cellhash_names, min_cells_ge
 create_seurat_arc <- function(input_files, input_fragments, input_larry = NULL, sample_name, min_cells_gene = 1,
                           is_larry = FALSE, UMI_cutoff = 0) {
   # Load files
-  names(input_files) <- sample_name
   arc <- Read10X(data.dir = input_files)
   
   if (is_larry) {
 
-    names(input_larry) <- sample_name
     larry <- Read10X(data.dir = input_larry)
 
     common_cells <- intersect(
       colnames(larry$Custom),
       colnames(arc$`Gene Expression`)
-    )
+    ) 
 
     seurat            <- CreateSeuratObject(counts = arc$`Gene Expression`[,common_cells], min.cells = min_cells_gene)
     seurat[["ATAC"]]  <- CreateChromatinAssay(counts = arc$`Peaks`[,common_cells], fragments = input_fragments, sep = c(":", "-"))
@@ -88,7 +87,12 @@ create_seurat_arc <- function(input_files, input_fragments, input_larry = NULL, 
   seurat$sample      <- sample_name
   seurat$subsample   <- sample_name
   Idents(seurat)     <- seurat$sample
-  
+
+  # Update cellnames to include a prefix with the sample name.
+  # In this case it is done after creating the chromatin assay to avoid errors
+  # when loading the fragments data which do not contain the preix in the name
+  seurat <- RenameCells(seurat, new.names = paste(sample_name, colnames(seurat), sep = "_"))
+
   # Remove cells with less than UMI threshold
   seurat <- subset(seurat, subset = nCount_RNA >= UMI_cutoff)
   
