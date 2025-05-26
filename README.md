@@ -167,7 +167,8 @@ Once you have all the configuration files as desired, it's time to execute the p
 
  ```bash
 ./local_execute_snakemake.sh # local
-./slurm_execute_snakemake.sh # HPC with slurm scheduler
+./slurm_execute_snakemake.sh # HPC with slurm scheduler or
+sbatch slurm_execute_snakemake_job.slurm # slurm launch as a job
 ```
 
 If no rule is given it will automatically execute the rule `all` (which would execute the standard pipeline).
