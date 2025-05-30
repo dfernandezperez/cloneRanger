@@ -104,6 +104,6 @@ rule generate_feature_ref_larry:
     log:
         "results/00_logs/generate_feature_ref/log"
     container:
-        "../envs/Seurat.yaml"
+        config["singularity"]["seurat_sif"]
     script:
         "../scripts/R/generate_feature_ref_larry.R"
