@@ -12,8 +12,8 @@ rule create_seurat:
         mito_pattern    = config["preprocessing"]["mito_pattern"],
         ribo_pattern    = config["preprocessing"]["ribo_pattern"],
         library_type    = config["cellranger_count"]["10x_pipeline"]
-    conda:
-         "../envs/Seurat.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     threads:
         RESOURCES["create_seurat"]["cpu"]
     resources:
@@ -40,8 +40,8 @@ if is_feature_bc():
             reads_cutoff  = LARRY["reads_cutoff"],
             umi_cutoff    = LARRY["umi_cutoff"],
             molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
-        conda:
-            "../envs/Seurat.yaml"
+        container:
+            config["singularity"]["seurat_sif"]
         threads:
             RESOURCES["barcode_filtering"]["cpu"]
         resources:
@@ -76,8 +76,8 @@ rule merge_seurat:
         expand("results/02_createSeurat/seurat_{sample}.rds", sample = SAMPLES)
     output:
         seurat = "results/03_mergeSeurat/seurat_merged.rds",
-    conda:
-         "../envs/Seurat.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     threads:
         RESOURCES["merge_seurat"]["cpu"]
     resources:
@@ -103,8 +103,8 @@ rule RNA_exploration:
         species       = config["preprocessing"]["species"],
         cluster_degs  = "results/04_RNA-exploration/cluster_degs.tsv",
         sample_degs   = "results/04_RNA-exploration/sample_degs.tsv"
-    conda:
-         "../envs/Seurat.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     threads:
         RESOURCES["RNA_exploration"]["cpu"]
     resources:
@@ -127,8 +127,8 @@ rule barcode_summary:
         html = "results/05_barcode-exploration/{sample}_barcode-summary.html"
     params:
         molecule_info = lambda w: f"results/01_counts/{w.sample}/outs/molecule_info.h5",
-    conda:
-         "../envs/Seurat.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     threads:
         RESOURCES["barcode_filtering"]["cpu"]
     resources:

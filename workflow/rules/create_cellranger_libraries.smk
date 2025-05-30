@@ -29,7 +29,7 @@ rule generate_feature_ref:
         "data/feature_reference/Feature-reference_{sample}.csv"
     log:
         "results/00_logs/generate_feature_ref/{sample}.log"
-    conda:
-        "../envs/Seurat.yaml"
+    container:
+        config["singularity"]["seurat_sif"]
     script:
         "../scripts/R/generate_feature_ref.R"

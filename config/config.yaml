@@ -5,6 +5,7 @@ singularity:
   cellranger_rna_sif      : docker://biotechpedro/cellranger:8.0.1
   cellranger_multiome_sif : docker://dfernand/cellranger_arc:2.0.2
   cellranger_atac_sif     : docker://dfernand/cellranger_atac:2.1.0
+  seurat_sif              : docker://dfernand/cloneranger:300525
 
 
 # Cellranger count parameters

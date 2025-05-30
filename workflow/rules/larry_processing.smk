@@ -17,8 +17,8 @@ rule extract_barcodes:
         "results/00_logs/extract_barcodes/{sample}.log"
     benchmark:
         "results/benchmarks/extract_barcodes/{sample}.txt"
-    conda:
-         "../envs/python.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     resources:
         mem_mb  = get_mem_mb(RESOURCES["extract_barcodes"]["mem_mb"], 20000),
         runtime = RESOURCES["extract_barcodes"]["runtime"]
@@ -65,8 +65,8 @@ rule correct_barcodes:
         runtime = RESOURCES["correct_barcodes"]["runtime"]
     retries:
         RESOURCES["correct_barcodes"]["retries"]
-    conda:
-         "../envs/python.yaml"
+    container:
+         config["singularity"]["seurat_sif"]
     script:
         "../scripts/python/correct_barcodes.py"
 
@@ -103,7 +103,7 @@ rule generate_feature_ref_larry:
         "data/feature_reference/Feature_reference_larry.csv"
     log:
         "results/00_logs/generate_feature_ref/log"
-    conda:
+    container:
         "../envs/Seurat.yaml"
     script:
         "../scripts/R/generate_feature_ref_larry.R"
