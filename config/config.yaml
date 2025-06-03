@@ -16,8 +16,8 @@ cellranger_count:
   introns: True
   create_bam: False
   # Genome references for GEX and ARC
-  genome_reference_gex: /home/dfernandezp/genome_ref_cellranger/refdata-gex-GRCm39-2024-A/
-  genome_refrerence_arc: /home/dfernandezp/genome_ref_cellranger/refdata-gex-GRCm39-2024-A/ # would not work but not going to be used
+  genome_reference_gex: /data/qscd/Users/SEQUENCING_DATA/References/Cellranger/refdata-gex-mm10-2020-A/
+  genome_refrerence_arc: /data/qscd/Users/SEQUENCING_DATA/References/Cellranger/refdata-gex-mm10-2020-A/ # would not work but not going to be used
   # Extra parameters for cellranger. Non-secondary is used to avoid cellranger
   # to perform UMAP, clustering, DEGs... 
   extra_parameters_atac: "--nosecondary"
