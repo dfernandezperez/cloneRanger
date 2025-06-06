@@ -13,6 +13,7 @@ if (length(snakemake@input)  == 1) {
 } else {
     seurat_objects <- map(snakemake@input, \(x) readRDS(x))
     seurat         <- merge(seurat_objects[[1]], seurat_objects[2:length(seurat_objects)] %>% unlist())
+    seurat         <- JoinLayers(seurat)
 }
 
 saveRDS(seurat, snakemake@output[["seurat"]])
