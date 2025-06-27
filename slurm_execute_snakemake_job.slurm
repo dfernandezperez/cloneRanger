@@ -6,8 +6,9 @@
 #SBATCH -e %N.%j.err # STDERR
 #SBATCH --time=48:00:00
 
-eval "$(conda shell.bash hook)"
-conda activate snakemake
+ml load Apptainer
+ml load anaconda3
+conda activate snakemakeconda activate snakemake
 
 snakemake -j 1 --unlock
 snakemake --profile config/snakemake_profile/slurm "$@"
