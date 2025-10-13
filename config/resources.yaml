@@ -41,8 +41,8 @@ create_seurat:
 RNA_exploration:
     cpu   : 1
     mem_mb: 100000
-    runtime: 180
-    retries: 3
+    runtime: 600
+    retries: 0
 
 merge_seurat:
     cpu : 1

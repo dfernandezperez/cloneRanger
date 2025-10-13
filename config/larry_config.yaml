@@ -12,7 +12,7 @@ read_cellular_bc: "R1" # Fastq containing the cellular barcode. Default: R1
 # Hamming distance to collapse barcodes with umicollapse
 # --------------------------------------------------------------------------------
 hamming_distance: 4  # Hamming distance to collapse barcodes with umicollapse
-reads_cutoff    : 10 # Minimum amount of reads to call a LARRY UMI
+reads_cutoff    : 5 # Minimum amount of reads to call a LARRY UMI
 umi_cutoff      : 3  # Minimum number of UMIs to consider a LARRY barcode as detected
 
 
