@@ -8,7 +8,7 @@
 
 ml load Apptainer
 ml load anaconda3
-conda activate snakemakeconda activate snakemake
+conda activate snakemake
 
 snakemake -j 1 --unlock
 snakemake --profile config/snakemake_profile/slurm "$@"
