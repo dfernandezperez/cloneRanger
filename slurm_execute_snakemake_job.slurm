@@ -6,7 +6,6 @@
 #SBATCH -e %N.%j.err # STDERR
 #SBATCH --time=48:00:00
 
-ml load Apptainer
 ml load anaconda3
 conda activate snakemake
 
